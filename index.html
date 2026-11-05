@@ -42,9 +42,9 @@
     <div class="wrap">
       <div class="eyebrow">Carta · actualizada en tiempo real</div>
       <h2>Nuestro menú</h2>
-      <ul id="menu-list" class="menu-list">
-        <li class="menu-empty">Cargando menú…</li>
-      </ul>
+      <div id="menu-grid" class="menu-grid">
+        <p class="menu-empty">Cargando menú…</p>
+      </div>
     </div>
   </section>
 
@@ -115,6 +115,18 @@
     </div>
   </section>
 </main>
+
+<div id="dish-modal" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dish-modal-title">
+    <button id="dish-modal-close" class="modal-close" type="button" aria-label="Cerrar">✕</button>
+    <div id="dish-modal-image" class="modal-image"></div>
+    <div class="modal-body">
+      <h3 id="dish-modal-title"></h3>
+      <p id="dish-modal-desc"></p>
+      <span id="dish-modal-price" class="modal-price"></span>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">

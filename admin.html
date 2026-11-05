@@ -42,11 +42,18 @@
       <input type="text" name="category" placeholder="Categoría (ej. Fuertes)" maxlength="40">
       <input type="number" name="price" placeholder="Precio en COP (ej. 25000)" step="500" min="0" max="2000000" required>
       <input type="text" name="description" placeholder="Descripción (opcional)" maxlength="200">
+      <input type="hidden" name="image_url">
+      <label class="image-field">
+        <span>Foto</span>
+        <input type="file" id="menu-image-input" accept="image/*">
+      </label>
+      <img id="menu-image-preview" class="menu-image-preview" hidden>
       <button type="submit" class="btn-primary">Guardar</button>
       <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+      <p id="menu-msg" class="msg"></p>
     </form>
     <table class="data-table" id="menu-table">
-      <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
   </section>

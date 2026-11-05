@@ -48,6 +48,7 @@ async function loadMenu() {
 function renderMenuTable() {
   $("#menu-table tbody").innerHTML = menuItems.map((it) => `
     <tr>
+      <td>${it.image_url ? `<img class="thumb" src="${esc(it.image_url)}" alt="">` : ""}</td>
       <td>${esc(it.name)}</td>
       <td>${esc(it.category || "")}</td>
       <td>${money(it.price)}</td>
@@ -56,26 +57,69 @@ function renderMenuTable() {
         <button data-edit="${it.id}">Editar</button>
         <button data-del="${it.id}">Eliminar</button>
       </td>
-    </tr>`).join("") || `<tr><td colspan="5">Sin platillos todavía.</td></tr>`;
+    </tr>`).join("") || `<tr><td colspan="6">Sin platillos todavía.</td></tr>`;
+}
+
+$("#menu-image-input").addEventListener("change", () => {
+  const file = $("#menu-image-input").files[0];
+  const preview = $("#menu-image-preview");
+  if (!file) return;
+  preview.src = URL.createObjectURL(file);
+  preview.hidden = false;
+});
+
+async function uploadSelectedImage() {
+  const file = $("#menu-image-input").files[0];
+  if (!file) return null;
+  const fd = new FormData();
+  fd.append("image", file);
+  const res = await fetch("/api/admin/upload", { method: "POST", body: fd, credentials: "same-origin" });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error || "No se pudo subir la imagen.");
+  return data.url;
 }
 
 $("#menu-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
+  const msg = $("#menu-msg");
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  let imageUrl = form.image_url.value || null;
+  if ($("#menu-image-input").files[0]) {
+    submitBtn.disabled = true;
+    if (msg) { msg.textContent = "Subiendo foto…"; msg.className = "msg"; }
+    try {
+      imageUrl = await uploadSelectedImage();
+    } catch (err) {
+      submitBtn.disabled = false;
+      if (msg) { msg.textContent = err.message; msg.className = "msg error"; }
+      return;
+    }
+  }
+
   const payload = Object.fromEntries(new FormData(form).entries());
+  payload.image_url = imageUrl;
   const id = payload.id;
   delete payload.id;
+
   const { error } = id
     ? await api("admin/menu/" + id, { method: "PATCH", body: JSON.stringify(payload) })
     : await api("admin/menu", { method: "POST", body: JSON.stringify(payload) });
-  if (error) return;
+
+  submitBtn.disabled = false;
+  if (error) { if (msg) { msg.textContent = "No se pudo guardar."; msg.className = "msg error"; } return; }
+
   form.reset();
+  $("#menu-image-preview").hidden = true;
   $("#menu-cancel").hidden = true;
+  if (msg) msg.textContent = "";
   await loadMenu();
 });
 
 $("#menu-cancel").addEventListener("click", () => {
   $("#menu-form").reset();
+  $("#menu-image-preview").hidden = true;
   $("#menu-cancel").hidden = true;
 });
 
@@ -91,6 +135,10 @@ $("#menu-table").addEventListener("click", async (e) => {
     form.category.value = it.category || "";
     form.price.value = it.price;
     form.description.value = it.description || "";
+    form.image_url.value = it.image_url || "";
+    $("#menu-image-input").value = "";
+    const preview = $("#menu-image-preview");
+    if (it.image_url) { preview.src = it.image_url; preview.hidden = false; } else { preview.hidden = true; }
     $("#menu-cancel").hidden = false;
   }
   if (delId) {

@@ -1,4 +1,4 @@
-import { turso, verifyPassword, makeSessionCookie, clearSessionCookie, readSession } from "../_lib/db.js";
+import { turso, verifyPassword, makeSessionCookie, clearSessionCookie, readSession, uploadImage, deleteImageByUrl } from "../_lib/db.js";
 
 const json = (data, init = {}) => new Response(JSON.stringify(data), { ...init, headers: { "Content-Type": "application/json", ...(init.headers || {}) } });
 const err = (message, status = 400) => json({ error: message }, { status });
@@ -23,6 +23,7 @@ export async function onRequest({ request, env, params }) {
     if (m && method === "DELETE") return deleteReservation(request, env, Number(m[1]));
 
     // ---------- Admin: menú ----------
+    if (path === "admin/upload" && method === "POST") return uploadMenuImage(request, env);
     if (path === "admin/menu" && method === "GET") return getAdminMenu(request, env);
     if (path === "admin/menu" && method === "POST") return createMenuItem(request, env);
     m = /^admin\/menu\/(\d+)$/.exec(path);
@@ -46,7 +47,7 @@ async function requireAdmin(request, env) {
 // =====================================================================
 async function getMenu(env) {
   const { rows } = await turso(env,
-    "SELECT id, name, description, price, category FROM menu_items WHERE available = 1 ORDER BY category, sort_order, id");
+    "SELECT id, name, description, price, category, image_url FROM menu_items WHERE available = 1 ORDER BY category, sort_order, id");
   return json(rows);
 }
 
@@ -137,6 +138,20 @@ async function getAdminMenu(request, env) {
   return json(rows);
 }
 
+async function uploadMenuImage(request, env) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const form = await request.formData().catch(() => null);
+  const file = form?.get("image");
+  if (!file || typeof file === "string") return err("data");
+  if (file.size > 5 * 1024 * 1024) return err("La imagen no puede pesar más de 5 MB.");
+  try {
+    const url = await uploadImage(env, file);
+    return json({ url });
+  } catch (e) {
+    return err("No se pudo subir la imagen. Revisa la configuración de R2.", 500);
+  }
+}
+
 function validMenuBody(b) {
   const name = String(b?.name || "").trim();
   const price = Number(b?.price);
@@ -150,8 +165,8 @@ async function createMenuItem(request, env) {
   const bad = validMenuBody(b);
   if (bad) return err(bad);
   const { lastInsertRowid: id } = await turso(env,
-    "INSERT INTO menu_items (name, description, price, category, sort_order, available) VALUES (?, ?, ?, ?, ?, ?)",
-    [b.name.trim(), b.description || "", Number(b.price), b.category || "General", Number(b.sort_order) || 0, b.available === false ? 0 : 1]);
+    "INSERT INTO menu_items (name, description, price, category, sort_order, available, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [b.name.trim(), b.description || "", Number(b.price), b.category || "General", Number(b.sort_order) || 0, b.available === false ? 0 : 1, b.image_url || null]);
   return json({ id });
 }
 
@@ -160,14 +175,21 @@ async function updateMenuItem(request, env, id) {
   const b = await request.json().catch(() => null);
   const bad = validMenuBody(b);
   if (bad) return err(bad);
+
+  const { rows: current } = await turso(env, "SELECT image_url FROM menu_items WHERE id = ?", [id]);
+  const oldImage = current[0]?.image_url;
+  if (oldImage && oldImage !== (b.image_url || null)) await deleteImageByUrl(env, oldImage);
+
   await turso(env,
-    "UPDATE menu_items SET name = ?, description = ?, price = ?, category = ?, sort_order = ?, available = ? WHERE id = ?",
-    [b.name.trim(), b.description || "", Number(b.price), b.category || "General", Number(b.sort_order) || 0, b.available === false ? 0 : 1, id]);
+    "UPDATE menu_items SET name = ?, description = ?, price = ?, category = ?, sort_order = ?, available = ?, image_url = ? WHERE id = ?",
+    [b.name.trim(), b.description || "", Number(b.price), b.category || "General", Number(b.sort_order) || 0, b.available === false ? 0 : 1, b.image_url || null, id]);
   return json({ ok: true });
 }
 
 async function deleteMenuItem(request, env, id) {
   if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const { rows: current } = await turso(env, "SELECT image_url FROM menu_items WHERE id = ?", [id]);
+  if (current[0]?.image_url) await deleteImageByUrl(env, current[0].image_url);
   await turso(env, "DELETE FROM menu_items WHERE id = ?", [id]);
   return json({ ok: true });
 }

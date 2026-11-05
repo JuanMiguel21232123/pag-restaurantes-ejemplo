@@ -24,6 +24,26 @@ export async function turso(env, sql, args = []) {
   };
 }
 
+// ---------- Fotos en R2: sube y borra imágenes del menú ----------
+// Necesita el binding PRODUCT_IMAGES (bucket R2) y R2_PUBLIC_BASE (URL pública del bucket).
+export async function uploadImage(env, file) {
+  if (!env.PRODUCT_IMAGES || !env.R2_PUBLIC_BASE) throw new Error("R2 no configurado");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const key = `menu/${crypto.randomUUID()}.${ext}`;
+  await env.PRODUCT_IMAGES.put(key, await file.arrayBuffer(), {
+    httpMetadata: { contentType: file.type || "application/octet-stream" },
+  });
+  return `${String(env.R2_PUBLIC_BASE).replace(/\/+$/, "")}/${key}`;
+}
+
+export async function deleteImageByUrl(env, url) {
+  if (!url || !env.PRODUCT_IMAGES || !env.R2_PUBLIC_BASE) return;
+  const base = String(env.R2_PUBLIC_BASE).replace(/\/+$/, "");
+  if (!String(url).startsWith(base + "/")) return;
+  const key = decodeURIComponent(url.slice(base.length + 1));
+  try { await env.PRODUCT_IMAGES.delete(key); } catch (e) {}
+}
+
 // ---------- Contraseñas: PBKDF2 con Web Crypto, sin librerías externas ----------
 const enc = new TextEncoder();
 const toHex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
