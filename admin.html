@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | La Parrilla del Valle</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="Styles/admin.css">
+</head>
+<body>
+
+<div id="login-view" class="login-view">
+  <form id="login-form" class="login-form">
+    <h1>Panel administrativo</h1>
+    <input type="email" name="email" placeholder="Correo" required>
+    <input type="password" name="password" placeholder="Contraseña" required>
+    <button type="submit">Entrar</button>
+    <p id="login-msg" class="msg error"></p>
+  </form>
+</div>
+
+<div id="panel-view" class="panel-view" hidden>
+  <header class="panel-head">
+    <div class="brand">La Parrilla del Valle · admin</div>
+    <div class="panel-head-right">
+      <span id="admin-name"></span>
+      <button id="logout" class="btn-ghost">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab" data-tab="menu" aria-pressed="true">Menú</button>
+    <button class="tab" data-tab="reservations" aria-pressed="false">Reservas</button>
+  </nav>
+
+  <section id="tab-menu" class="tab-panel">
+    <form id="menu-form" class="inline-form">
+      <input type="hidden" name="id">
+      <input type="text" name="name" placeholder="Nombre del platillo" required>
+      <input type="text" name="category" placeholder="Categoría (ej. Fuertes)">
+      <input type="number" name="price" placeholder="Precio" step="0.01" min="0" required>
+      <input type="text" name="description" placeholder="Descripción (opcional)">
+      <button type="submit" class="btn-primary">Guardar</button>
+      <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+    </form>
+    <table class="data-table" id="menu-table">
+      <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="tab-reservations" class="tab-panel" hidden>
+    <table class="data-table" id="reservations-table">
+      <thead><tr><th>Código</th><th>Nombre</th><th>Fecha</th><th>Hora</th><th>Personas</th><th>Estado</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</div>
+
+<script src="Scripts/config.js"></script>
+<script src="Scripts/site.js"></script>
+<script src="Scripts/admin.js"></script>
+</body>
+</html>

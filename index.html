@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="La Parrilla del Valle — menú y reservas en línea.">
+<title>La Parrilla del Valle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="Styles/index.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="brand">La Parrilla del Valle</div>
+    <a class="nav-cta" href="#reservar">Reservar</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1 data-s="hero_title">Cocina de fuego lento, en el corazón del valle.</h1>
+      <p data-s="hero_text">Carnes a la parrilla, ingredientes locales y una carta que cambia con la temporada.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#menu">Ver el menú</a>
+        <a class="btn-ghost" href="#reservar">Reservar mesa</a>
+      </div>
+    </div>
+    <div class="plate"><span>Abierto todos los días, 12 m – 10 pm</span></div>
+  </div>
+</section>
+
+<section class="featured" id="menu">
+  <div class="wrap">
+    <div class="eyebrow">Carta · actualizada en tiempo real</div>
+    <h2>Nuestro menú</h2>
+    <ul id="menu-list" class="menu-list">
+      <li class="menu-empty">Cargando menú…</li>
+    </ul>
+  </div>
+</section>
+
+<section class="reserve" id="reservar">
+  <div class="wrap">
+    <div class="eyebrow">Reservas</div>
+    <h2>Resérvanos tu mesa</h2>
+    <form id="reservation-form" class="reservation-form" novalidate>
+      <div class="field-row">
+        <input type="text" name="name" placeholder="Nombre" required>
+        <input type="number" name="guests" placeholder="Personas" min="1" max="30" required>
+      </div>
+      <div class="field-row">
+        <input type="date" name="date" required>
+        <input type="time" name="time" required>
+      </div>
+      <input type="email" name="email" placeholder="Correo (opcional)">
+      <button type="submit" class="btn-primary btn-form">Reservar mesa</button>
+      <p id="form-status" class="form-status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    La Parrilla del Valle &copy; <span id="year"></span>
+    · <a href="admin.html">Acceso administrativo</a>
+  </div>
+</footer>
+
+<script src="Scripts/config.js"></script>
+<script src="Scripts/site.js"></script>
+<script src="Scripts/index.js"></script>
+</body>
+</html>
