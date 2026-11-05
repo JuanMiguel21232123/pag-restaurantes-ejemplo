@@ -1,5 +1,5 @@
 // Portada: menú real desde Turso + formulario de reservas conectado a /api/reservations.
-
+ 
 async function renderMenu() {
   const list = $("#menu-list");
   const { data, error } = await api("public/menu");
@@ -22,20 +22,26 @@ async function renderMenu() {
         </div>`).join("")}
     </div>`).join("");
 }
-
+ 
 function setupReservationForm() {
   const dateInput = $("#r-date");
   if (dateInput) dateInput.min = new Date().toISOString().slice(0, 10);
-
+ 
   const form = $("#reservation-form");
   const status = $("#form-status");
   const done = $("#reservation-done");
-
+ 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const payload = Object.fromEntries(new FormData(form).entries());
+    const guests = Number(payload.guests);
     if (!payload.name || !payload.date || !payload.time) {
       status.textContent = "Completa nombre, fecha y hora.";
+      status.className = "form-status error";
+      return;
+    }
+    if (!Number.isInteger(guests) || guests < 1 || guests > 15) {
+      status.textContent = "El número de personas debe ser entre 1 y 15.";
       status.className = "form-status error";
       return;
     }
@@ -43,7 +49,7 @@ function setupReservationForm() {
     btn.disabled = true;
     status.textContent = "Guardando tu reserva…";
     status.className = "form-status";
-
+ 
     const { data, error } = await api("reservations", { method: "POST", body: JSON.stringify(payload) });
     btn.disabled = false;
     if (error) {
@@ -51,7 +57,7 @@ function setupReservationForm() {
       status.className = "form-status error";
       return;
     }
-
+ 
     const text = [
       `Hola, acabo de hacer la reserva ${data.code} en ${BUSINESS}:`,
       `Nombre: ${payload.name}`,
@@ -59,13 +65,13 @@ function setupReservationForm() {
       `Personas: ${payload.guests}`,
       payload.email ? `Correo: ${payload.email}` : "",
     ].filter(Boolean).join("\n");
-
+ 
     $("#done-code").textContent = "Código " + data.code;
     $("#done-wa").href = waLink(text);
     form.hidden = true;
     done.hidden = false;
   });
-
+ 
   $("#done-close").addEventListener("click", () => {
     form.reset();
     status.textContent = "";
@@ -73,7 +79,8 @@ function setupReservationForm() {
     done.hidden = true;
   });
 }
-
+ 
 loadSettings();
 renderMenu();
 setupReservationForm();
+ 
