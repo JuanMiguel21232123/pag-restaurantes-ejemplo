@@ -48,7 +48,7 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 .reserve h2{font-size:clamp(1.6rem,3vw,2.1rem);}
 .reservation-form{margin-top:30px; max-width:480px; display:flex; flex-direction:column; gap:12px;}
 .field-row{display:flex; gap:10px;}
-.reservation-form input{flex:1; background:var(--bg-card); border:1px solid var(--line); color:var(--text); padding:11px 14px; border-radius:3px; font-family:var(--sans); font-size:.92rem; min-width:0;}
+.reservation-form input, .reservation-form select{flex:1; background:var(--bg-card); border:1px solid var(--line); color:var(--text); padding:11px 14px; border-radius:3px; font-family:var(--sans); font-size:.92rem; min-width:0;}
 .reservation-form input:focus, .btn-form:focus-visible, .nav-cta:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
 .form-status{font-size:.85rem; color:var(--text-muted); min-height:1.2em;}
 .form-status.ok{color:var(--gold-soft);}
