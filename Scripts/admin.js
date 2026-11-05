@@ -60,19 +60,47 @@ function renderMenuTable() {
     </tr>`).join("") || `<tr><td colspan="6">Sin platillos todavía.</td></tr>`;
 }
 
-$("#menu-image-input").addEventListener("change", () => {
+let selectedImageBlob = null;
+
+async function convertToWebp(file, maxDim = 1600, quality = 0.82) {
+  try {
+    const bitmap = await createImageBitmap(file);
+    let { width, height } = bitmap;
+    if (width > maxDim || height > maxDim) {
+      const scale = maxDim / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    return blob && blob.type === "image/webp" ? blob : file; // si el navegador no soporta WebP, se sube el original
+  } catch (e) {
+    return file;
+  }
+}
+
+$("#menu-image-input").addEventListener("change", async () => {
   const file = $("#menu-image-input").files[0];
   const preview = $("#menu-image-preview");
-  if (!file) return;
+  const msg = $("#menu-msg");
+  if (!file) { selectedImageBlob = null; return; }
+
   preview.src = URL.createObjectURL(file);
   preview.hidden = false;
+  if (msg) { msg.textContent = "Optimizando imagen…"; msg.className = "msg"; }
+
+  selectedImageBlob = await convertToWebp(file);
+  preview.src = URL.createObjectURL(selectedImageBlob);
+  if (msg) msg.textContent = "";
 });
 
 async function uploadSelectedImage() {
-  const file = $("#menu-image-input").files[0];
-  if (!file) return null;
+  if (!selectedImageBlob) return null;
   const fd = new FormData();
-  fd.append("image", file);
+  fd.append("image", selectedImageBlob, "foto.webp");
   const res = await fetch("/api/admin/upload", { method: "POST", body: fd, credentials: "same-origin" });
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new Error(data?.error || "No se pudo subir la imagen.");
@@ -86,7 +114,7 @@ $("#menu-form").addEventListener("submit", async (e) => {
   const submitBtn = form.querySelector('button[type="submit"]');
 
   let imageUrl = form.image_url.value || null;
-  if ($("#menu-image-input").files[0]) {
+  if (selectedImageBlob) {
     submitBtn.disabled = true;
     if (msg) { msg.textContent = "Subiendo foto…"; msg.className = "msg"; }
     try {
@@ -113,6 +141,7 @@ $("#menu-form").addEventListener("submit", async (e) => {
   form.reset();
   $("#menu-image-preview").hidden = true;
   $("#menu-cancel").hidden = true;
+  selectedImageBlob = null;
   if (msg) msg.textContent = "";
   await loadMenu();
 });
@@ -121,6 +150,7 @@ $("#menu-cancel").addEventListener("click", () => {
   $("#menu-form").reset();
   $("#menu-image-preview").hidden = true;
   $("#menu-cancel").hidden = true;
+  selectedImageBlob = null;
 });
 
 $("#menu-table").addEventListener("click", async (e) => {
@@ -137,6 +167,7 @@ $("#menu-table").addEventListener("click", async (e) => {
     form.description.value = it.description || "";
     form.image_url.value = it.image_url || "";
     $("#menu-image-input").value = "";
+    selectedImageBlob = null;
     const preview = $("#menu-image-preview");
     if (it.image_url) { preview.src = it.image_url; preview.hidden = false; } else { preview.hidden = true; }
     $("#menu-cancel").hidden = false;
