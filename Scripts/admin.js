@@ -146,6 +146,7 @@ function renderMenuTable() {
   container.innerHTML = Object.entries(groups).map(([cat, items]) => `
     <div class="menu-section">
       <h3>${esc(cat)}</h3>
+      <div class="data-table-wrap">
       <table class="data-table">
         <thead><tr><th></th><th>Nombre</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
         <tbody>
@@ -162,6 +163,7 @@ function renderMenuTable() {
             </tr>`).join("")}
         </tbody>
       </table>
+      </div>
     </div>`).join("");
 }
 
