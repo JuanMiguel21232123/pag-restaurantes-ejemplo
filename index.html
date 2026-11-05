@@ -142,7 +142,20 @@
       <h3 id="order-modal-title">Tu pedido</h3>
       <div id="order-items"></div>
       <div class="order-total">Total: <strong id="order-total"></strong></div>
-      <a id="order-wa" class="btn-primary" target="_blank" rel="noopener noreferrer" href="#">Enviar pedido por WhatsApp ↗</a>
+
+      <form id="order-customer-form" class="order-customer-form">
+        <input type="text" name="name" placeholder="Tu nombre" maxlength="60">
+        <input type="tel" name="phone" placeholder="Teléfono de contacto" maxlength="20">
+        <input type="text" name="address" placeholder="Dirección de entrega (opcional)" maxlength="120">
+        <div class="payment-choice">
+          <span class="payment-choice-label">¿Cómo vas a pagar?</span>
+          <label><input type="radio" name="payment" value="efectivo" checked> Efectivo</label>
+          <label><input type="radio" name="payment" value="nequi"> Nequi</label>
+        </div>
+      </form>
+
+      <p id="order-msg" class="form-status" aria-live="polite"></p>
+      <button id="order-send" class="btn-primary" type="button">Enviar pedido por WhatsApp ↗</button>
       <button id="order-clear" class="btn-ghost" type="button">Vaciar pedido</button>
     </div>
   </div>

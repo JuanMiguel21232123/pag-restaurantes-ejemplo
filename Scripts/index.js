@@ -2,6 +2,7 @@
 
 let menuData = [];
 let order = loadOrder(); // { "<id>": cantidad }
+let orderCustomer = loadOrderCustomer(); // { name, phone, address, payment }
 
 // ---------- Persistencia del pedido (localStorage del cliente) ----------
 function loadOrder() {
@@ -16,6 +17,21 @@ function loadOrder() {
 
 function saveOrder() {
   try { localStorage.setItem("parrilla_pedido", JSON.stringify(order)); } catch (e) {}
+}
+
+function loadOrderCustomer() {
+  const fallback = { name: "", phone: "", address: "", payment: "efectivo" };
+  try {
+    const raw = localStorage.getItem("parrilla_pedido_datos");
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? { ...fallback, ...parsed } : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function saveOrderCustomer() {
+  try { localStorage.setItem("parrilla_pedido_datos", JSON.stringify(orderCustomer)); } catch (e) {}
 }
 
 function orderCount() {
