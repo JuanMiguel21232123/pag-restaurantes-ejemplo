@@ -51,22 +51,31 @@
     </nav>
 
     <div id="submenu-add" class="subtab-panel">
-      <form id="menu-form" class="inline-form">
+      <form id="menu-form" class="stacked-form">
         <input type="hidden" name="id">
-        <input type="text" name="name" placeholder="Nombre del platillo" maxlength="80" required>
-        <select name="category" required>
-          <option value="" disabled selected>Sección</option>
-        </select>
-        <input type="number" name="price" placeholder="Precio en COP (ej. 17950)" step="1" min="0" max="2000000" required>
-        <input type="text" name="description" placeholder="Descripción (opcional)" maxlength="200">
+        <label>Nombre del platillo
+          <input type="text" name="name" placeholder="Ej. Lomo al carbón" maxlength="80" required>
+        </label>
+        <label>Sección
+          <select name="category" required>
+            <option value="" disabled selected>Selecciona una sección</option>
+          </select>
+        </label>
+        <label>Precio en COP
+          <input type="number" name="price" placeholder="Ej. 17950" step="1" min="0" max="2000000" required>
+        </label>
+        <label>Descripción <span class="label-optional">(opcional)</span>
+          <input type="text" name="description" placeholder="Breve descripción del platillo" maxlength="200">
+        </label>
         <input type="hidden" name="image_url">
-        <label class="image-field">
-          <span>Foto</span>
+        <label>Foto del platillo
           <input type="file" id="menu-image-input" accept="image/*">
         </label>
         <img id="menu-image-preview" class="menu-image-preview" hidden>
-        <button type="submit" class="btn-primary">Guardar</button>
-        <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+        <div class="stacked-form-actions">
+          <button type="submit" class="btn-primary">Guardar platillo</button>
+          <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+        </div>
         <p id="menu-msg" class="msg"></p>
       </form>
     </div>
