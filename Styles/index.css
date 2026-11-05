@@ -21,8 +21,11 @@ h1,h2{font-family:var(--serif); font-weight:600;}
 header{position:sticky; top:0; z-index:40; padding-top:env(safe-area-inset-top,0px); background:rgba(9,7,5,.88); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
 nav{display:flex; align-items:center; justify-content:space-between; padding:18px 28px; max-width:1080px; margin:0 auto;}
 .brand{font-family:var(--serif); font-size:1.2rem; font-style:italic; color:var(--gold-soft);}
-.nav-cta{font-size:.9rem; font-weight:500; padding:9px 18px; border:1px solid var(--gold); border-radius:3px; color:var(--gold-soft); text-decoration:none;}
-.nav-cta:hover{background:var(--gold); color:#090705;}
+.nav-tabs{display:flex; gap:8px;}
+.nav-tab{background:none; border:1px solid var(--line); color:var(--text-muted); padding:9px 18px; border-radius:3px; font-family:var(--sans); font-size:.9rem; cursor:pointer;}
+.nav-tab:hover{color:var(--gold-soft);}
+.nav-tab[aria-pressed="true"]{color:var(--gold-soft); border-color:var(--gold);}
+.tab-panel{min-height:calc(100vh - 73px);}
 
 .hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:56px; align-items:center;}
 .hero h1{font-size:clamp(2.1rem,4.4vw,3.2rem); line-height:1.15; max-width:16ch;}
@@ -67,4 +70,6 @@ footer a:hover{color:var(--gold-soft);}
   .hero-grid{grid-template-columns:1fr;}
   .plate{max-width:200px; margin:0 auto;}
   .field-row{flex-direction:column;}
+  nav{flex-wrap:wrap; gap:10px; padding:14px 20px;}
+  .nav-tab{padding:7px 14px; font-size:.84rem;}
 }

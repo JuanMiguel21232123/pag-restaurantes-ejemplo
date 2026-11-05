@@ -15,100 +15,106 @@
 <header>
   <nav>
     <div class="brand">La Parrilla del Valle</div>
-    <a class="nav-cta" href="#reservar">Reservar</a>
+    <div class="nav-tabs" role="tablist" aria-label="Secciones">
+      <button class="nav-tab" type="button" data-tab="inicio" role="tab" aria-pressed="true">Inicio</button>
+      <button class="nav-tab" type="button" data-tab="menu" role="tab" aria-pressed="false">Menú</button>
+      <button class="nav-tab" type="button" data-tab="reservar" role="tab" aria-pressed="false">Reservar</button>
+    </div>
   </nav>
 </header>
 
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <h1 data-s="hero_title">Cocina de fuego lento, en el corazón del valle.</h1>
-      <p data-s="hero_text">Carnes a la parrilla, ingredientes locales y una carta que cambia con la temporada.</p>
-      <div class="hero-actions">
-        <a class="btn-primary" href="#menu">Ver el menú</a>
-        <a class="btn-ghost" href="#reservar">Reservar mesa</a>
+<main>
+  <section id="tab-inicio" class="tab-panel hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1 data-s="hero_title">Cocina de fuego lento, en el corazón del valle.</h1>
+        <p data-s="hero_text">Carnes a la parrilla, ingredientes locales y una carta que cambia con la temporada.</p>
+        <div class="hero-actions">
+          <button class="btn-primary" type="button" data-goto="menu">Ver el menú</button>
+          <button class="btn-ghost" type="button" data-goto="reservar">Reservar mesa</button>
+        </div>
+      </div>
+      <div class="plate"><span>Abierto todos los días, 12 m – 10 pm</span></div>
+    </div>
+  </section>
+
+  <section id="tab-menu" class="tab-panel featured" hidden>
+    <div class="wrap">
+      <div class="eyebrow">Carta · actualizada en tiempo real</div>
+      <h2>Nuestro menú</h2>
+      <ul id="menu-list" class="menu-list">
+        <li class="menu-empty">Cargando menú…</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="tab-reservar" class="tab-panel reserve" hidden>
+    <div class="wrap">
+      <div class="eyebrow">Reservas</div>
+      <h2>Resérvanos tu mesa</h2>
+      <form id="reservation-form" class="reservation-form" novalidate>
+        <div class="field-row">
+          <input type="text" name="name" placeholder="Nombre" maxlength="60" required>
+          <select name="guests" required>
+            <option value="" disabled selected>Personas</option>
+            <option value="1">1 persona</option>
+            <option value="2">2 personas</option>
+            <option value="3">3 personas</option>
+            <option value="4">4 personas</option>
+            <option value="5">5 personas</option>
+            <option value="6">6 personas</option>
+            <option value="7">7 personas</option>
+            <option value="8">8 personas</option>
+            <option value="9">9 personas</option>
+            <option value="10">10 personas</option>
+            <option value="11">11 personas</option>
+            <option value="12">12 personas</option>
+            <option value="13">13 personas</option>
+            <option value="14">14 personas</option>
+            <option value="15">15 personas</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <input type="date" name="date" id="r-date" required>
+          <select name="time" required>
+            <option value="" disabled selected>Hora</option>
+            <option value="12:00">12:00 m</option>
+            <option value="12:30">12:30 m</option>
+            <option value="13:00">1:00 pm</option>
+            <option value="13:30">1:30 pm</option>
+            <option value="14:00">2:00 pm</option>
+            <option value="14:30">2:30 pm</option>
+            <option value="15:00">3:00 pm</option>
+            <option value="15:30">3:30 pm</option>
+            <option value="16:00">4:00 pm</option>
+            <option value="16:30">4:30 pm</option>
+            <option value="17:00">5:00 pm</option>
+            <option value="17:30">5:30 pm</option>
+            <option value="18:00">6:00 pm</option>
+            <option value="18:30">6:30 pm</option>
+            <option value="19:00">7:00 pm</option>
+            <option value="19:30">7:30 pm</option>
+            <option value="20:00">8:00 pm</option>
+            <option value="20:30">8:30 pm</option>
+            <option value="21:00">9:00 pm</option>
+            <option value="21:30">9:30 pm</option>
+            <option value="22:00">10:00 pm</option>
+          </select>
+        </div>
+        <input type="email" name="email" placeholder="Correo (opcional)">
+        <button type="submit" class="btn-primary btn-form">Reservar mesa</button>
+        <p id="form-status" class="form-status" aria-live="polite"></p>
+      </form>
+      <div id="reservation-done" class="reservation-done" hidden>
+        <p class="eyebrow">RESERVA REGISTRADA</p>
+        <h3 id="done-code"></h3>
+        <p>Confírmala con nosotros por WhatsApp para que quede lista.</p>
+        <a id="done-wa" class="btn-primary" target="_blank" rel="noopener noreferrer" href="#">Enviar por WhatsApp ↗</a>
+        <button id="done-close" class="btn-ghost" type="button">Hacer otra reserva</button>
       </div>
     </div>
-    <div class="plate"><span>Abierto todos los días, 12 m – 10 pm</span></div>
-  </div>
-</section>
-
-<section class="featured" id="menu">
-  <div class="wrap">
-    <div class="eyebrow">Carta · actualizada en tiempo real</div>
-    <h2>Nuestro menú</h2>
-    <ul id="menu-list" class="menu-list">
-      <li class="menu-empty">Cargando menú…</li>
-    </ul>
-  </div>
-</section>
-
-<section class="reserve" id="reservar">
-  <div class="wrap">
-    <div class="eyebrow">Reservas</div>
-    <h2>Resérvanos tu mesa</h2>
-    <form id="reservation-form" class="reservation-form" novalidate>
-      <div class="field-row">
-        <input type="text" name="name" placeholder="Nombre" maxlength="60" required>
-        <select name="guests" required>
-          <option value="" disabled selected>Personas</option>
-          <option value="1">1 persona</option>
-          <option value="2">2 personas</option>
-          <option value="3">3 personas</option>
-          <option value="4">4 personas</option>
-          <option value="5">5 personas</option>
-          <option value="6">6 personas</option>
-          <option value="7">7 personas</option>
-          <option value="8">8 personas</option>
-          <option value="9">9 personas</option>
-          <option value="10">10 personas</option>
-          <option value="11">11 personas</option>
-          <option value="12">12 personas</option>
-          <option value="13">13 personas</option>
-          <option value="14">14 personas</option>
-          <option value="15">15 personas</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <input type="date" name="date" id="r-date" required>
-        <select name="time" required>
-          <option value="" disabled selected>Hora</option>
-          <option value="12:00">12:00 m</option>
-          <option value="12:30">12:30 m</option>
-          <option value="13:00">1:00 pm</option>
-          <option value="13:30">1:30 pm</option>
-          <option value="14:00">2:00 pm</option>
-          <option value="14:30">2:30 pm</option>
-          <option value="15:00">3:00 pm</option>
-          <option value="15:30">3:30 pm</option>
-          <option value="16:00">4:00 pm</option>
-          <option value="16:30">4:30 pm</option>
-          <option value="17:00">5:00 pm</option>
-          <option value="17:30">5:30 pm</option>
-          <option value="18:00">6:00 pm</option>
-          <option value="18:30">6:30 pm</option>
-          <option value="19:00">7:00 pm</option>
-          <option value="19:30">7:30 pm</option>
-          <option value="20:00">8:00 pm</option>
-          <option value="20:30">8:30 pm</option>
-          <option value="21:00">9:00 pm</option>
-          <option value="21:30">9:30 pm</option>
-          <option value="22:00">10:00 pm</option>
-        </select>
-      </div>
-      <input type="email" name="email" placeholder="Correo (opcional)">
-      <button type="submit" class="btn-primary btn-form">Reservar mesa</button>
-      <p id="form-status" class="form-status" aria-live="polite"></p>
-    </form>
-    <div id="reservation-done" class="reservation-done" hidden>
-      <p class="eyebrow">RESERVA REGISTRADA</p>
-      <h3 id="done-code"></h3>
-      <p>Confírmala con nosotros por WhatsApp para que quede lista.</p>
-      <a id="done-wa" class="btn-primary" target="_blank" rel="noopener noreferrer" href="#">Enviar por WhatsApp ↗</a>
-      <button id="done-close" class="btn-ghost" type="button">Hacer otra reserva</button>
-    </div>
-  </div>
-</section>
+  </section>
+</main>
 
 <footer>
   <div class="wrap">

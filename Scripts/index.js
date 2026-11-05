@@ -80,6 +80,18 @@ function setupReservationForm() {
   });
 }
  
+function switchTab(tab) {
+  document.querySelectorAll(".nav-tab").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === tab)));
+  document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = p.id !== "tab-" + tab));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+ 
+function setupTabs() {
+  document.querySelectorAll(".nav-tab").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+  document.querySelectorAll("[data-goto]").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.goto)));
+}
+ 
+setupTabs();
 loadSettings();
 renderMenu();
 setupReservationForm();
