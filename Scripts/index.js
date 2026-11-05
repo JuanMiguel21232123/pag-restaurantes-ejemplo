@@ -156,9 +156,9 @@ function buildOrderText() {
   const customerLines = [
     `Nombre: ${orderCustomer.name.trim()}`,
     `Teléfono: ${orderCustomer.phone.trim()}`,
-    orderCustomer.address.trim() ? `Dirección: ${orderCustomer.address.trim()}` : null,
+    `Dirección: ${orderCustomer.address.trim()}`,
     `Pago: ${paymentLabel}`,
-  ].filter(Boolean);
+  ];
 
   return [
     `Hola, quiero hacer este pedido en ${business}:`,
@@ -247,8 +247,8 @@ function setupOrder() {
 
   $("#order-send").addEventListener("click", () => {
     const msg = $("#order-msg");
-    if (!orderCustomer.name.trim() || !orderCustomer.phone.trim()) {
-      msg.textContent = "Completa tu nombre y teléfono para enviar el pedido.";
+    if (!orderCustomer.name.trim() || !orderCustomer.phone.trim() || !orderCustomer.address.trim()) {
+      msg.textContent = "Completa tu nombre, teléfono y dirección para enviar el pedido.";
       msg.className = "form-status error";
       return;
     }
