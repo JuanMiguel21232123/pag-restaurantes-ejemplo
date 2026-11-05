@@ -31,6 +31,7 @@
 
   <nav class="tabs">
     <button class="tab" data-tab="menu" aria-pressed="true">Menú</button>
+    <button class="tab" data-tab="categories" aria-pressed="false">Secciones</button>
     <button class="tab" data-tab="reservations" aria-pressed="false">Reservas</button>
     <button class="tab" data-tab="settings" aria-pressed="false">Configuración</button>
   </nav>
@@ -39,7 +40,9 @@
     <form id="menu-form" class="inline-form">
       <input type="hidden" name="id">
       <input type="text" name="name" placeholder="Nombre del platillo" maxlength="80" required>
-      <input type="text" name="category" placeholder="Categoría (ej. Fuertes)" maxlength="40">
+      <select name="category" required>
+        <option value="" disabled selected>Sección</option>
+      </select>
       <input type="number" name="price" placeholder="Precio en COP (ej. 17950)" step="1" min="0" max="2000000" required>
       <input type="text" name="description" placeholder="Descripción (opcional)" maxlength="200">
       <input type="hidden" name="image_url">
@@ -52,8 +55,20 @@
       <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
       <p id="menu-msg" class="msg"></p>
     </form>
-    <table class="data-table" id="menu-table">
-      <thead><tr><th></th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
+    <div id="menu-table-container"></div>
+  </section>
+
+  <section id="tab-categories" class="tab-panel" hidden>
+    <form id="category-form" class="inline-form">
+      <input type="hidden" name="id">
+      <input type="text" name="name" placeholder="Nombre de la sección (ej. Fuertes)" maxlength="40" required>
+      <input type="number" name="sort_order" placeholder="Orden (ej. 1)" min="0" step="1">
+      <button type="submit" class="btn-primary">Guardar</button>
+      <button type="button" id="category-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+      <p id="category-msg" class="msg"></p>
+    </form>
+    <table class="data-table" id="categories-table">
+      <thead><tr><th>Nombre</th><th>Orden</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
   </section>

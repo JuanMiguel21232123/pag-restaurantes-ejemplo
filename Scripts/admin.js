@@ -1,5 +1,6 @@
-// Panel admin: login por sesión (cookie firmada), gestión de menú y reservas.
+// Panel admin: login por sesión (cookie firmada), gestión de menú, secciones y reservas.
 let menuItems = [];
+let categoryItems = [];
 
 async function checkSession() {
   const { data } = await api("session");
@@ -10,7 +11,7 @@ function showPanel(name) {
   $("#login-view").hidden = true;
   $("#panel-view").hidden = false;
   $("#admin-name").textContent = name;
-  loadMenu();
+  loadCategories().then(loadMenu);
   loadReservations();
   loadSettingsForm();
 }
@@ -38,6 +39,85 @@ document.querySelectorAll(".tab").forEach((btn) => {
   });
 });
 
+// ---------- Secciones (categorías) ----------
+async function loadCategories() {
+  const { data } = await api("admin/categories");
+  categoryItems = data || [];
+  renderCategorySelect();
+  renderCategoriesTable();
+}
+
+function renderCategorySelect() {
+  const select = $("#menu-form select[name=category]");
+  if (!select) return;
+  const current = select.value;
+  select.innerHTML = '<option value="" disabled>Sección</option>' +
+    categoryItems.map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
+  if (current && categoryItems.some((c) => c.name === current)) {
+    select.value = current;
+  } else {
+    select.querySelector('option[value=""]').selected = true;
+  }
+}
+
+function renderCategoriesTable() {
+  $("#categories-table tbody").innerHTML = categoryItems.map((c) => `
+    <tr>
+      <td>${esc(c.name)}</td>
+      <td>${esc(c.sort_order ?? 0)}</td>
+      <td>
+        <button data-edit-cat="${c.id}">Editar</button>
+        <button data-del-cat="${c.id}">Eliminar</button>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="3">Sin secciones todavía. Crea la primera arriba (ej. Fuertes, Bebidas, Postres).</td></tr>`;
+}
+
+$("#category-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = $("#category-msg");
+  const payload = Object.fromEntries(new FormData(form).entries());
+  const id = payload.id;
+  delete payload.id;
+
+  const { error } = id
+    ? await api("admin/categories/" + id, { method: "PATCH", body: JSON.stringify(payload) })
+    : await api("admin/categories", { method: "POST", body: JSON.stringify(payload) });
+
+  if (error) { if (msg) { msg.textContent = error.message || "No se pudo guardar."; msg.className = "msg error"; } return; }
+
+  form.reset();
+  $("#category-cancel").hidden = true;
+  if (msg) msg.textContent = "";
+  await loadCategories();
+  await loadMenu();
+});
+
+$("#category-cancel").addEventListener("click", () => {
+  $("#category-form").reset();
+  $("#category-cancel").hidden = true;
+});
+
+$("#categories-table").addEventListener("click", async (e) => {
+  const editId = e.target.dataset.editCat;
+  const delId = e.target.dataset.delCat;
+  if (editId) {
+    const c = categoryItems.find((x) => String(x.id) === editId);
+    if (!c) return;
+    const form = $("#category-form");
+    form.id.value = c.id;
+    form.name.value = c.name;
+    form.sort_order.value = c.sort_order ?? 0;
+    $("#category-cancel").hidden = false;
+  }
+  if (delId) {
+    if (!confirm("¿Eliminar esta sección?")) return;
+    const { error } = await api("admin/categories/" + delId, { method: "DELETE" });
+    if (error) { alert(error.message || "No se pudo eliminar."); return; }
+    await loadCategories();
+  }
+});
+
 // ---------- Menú ----------
 async function loadMenu() {
   const { data } = await api("admin/menu");
@@ -46,18 +126,33 @@ async function loadMenu() {
 }
 
 function renderMenuTable() {
-  $("#menu-table tbody").innerHTML = menuItems.map((it) => `
-    <tr>
-      <td>${it.image_url ? `<img class="thumb" src="${esc(it.image_url)}" alt="">` : ""}</td>
-      <td>${esc(it.name)}</td>
-      <td>${esc(it.category || "")}</td>
-      <td>${money(it.price)}</td>
-      <td>${it.available ? "Sí" : "No"}</td>
-      <td>
-        <button data-edit="${it.id}">Editar</button>
-        <button data-del="${it.id}">Eliminar</button>
-      </td>
-    </tr>`).join("") || `<tr><td colspan="6">Sin platillos todavía.</td></tr>`;
+  const container = $("#menu-table-container");
+  if (!menuItems.length) {
+    container.innerHTML = '<p class="menu-empty">Sin platillos todavía.</p>';
+    return;
+  }
+  const groups = {};
+  menuItems.forEach((it) => (groups[it.category || "Sin sección"] ||= []).push(it));
+  container.innerHTML = Object.entries(groups).map(([cat, items]) => `
+    <div class="menu-section">
+      <h3>${esc(cat)}</h3>
+      <table class="data-table">
+        <thead><tr><th></th><th>Nombre</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
+        <tbody>
+          ${items.map((it) => `
+            <tr>
+              <td>${it.image_url ? `<img class="thumb" src="${esc(it.image_url)}" alt="">` : ""}</td>
+              <td>${esc(it.name)}</td>
+              <td>${money(it.price)}</td>
+              <td>${it.available ? "Sí" : "No"}</td>
+              <td>
+                <button data-edit="${it.id}">Editar</button>
+                <button data-del="${it.id}">Eliminar</button>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`).join("");
 }
 
 let selectedImageBlob = null;
@@ -113,6 +208,11 @@ $("#menu-form").addEventListener("submit", async (e) => {
   const msg = $("#menu-msg");
   const submitBtn = form.querySelector('button[type="submit"]');
 
+  if (!form.category.value) {
+    if (msg) { msg.textContent = "Selecciona una sección."; msg.className = "msg error"; }
+    return;
+  }
+
   let imageUrl = form.image_url.value || null;
   if (selectedImageBlob) {
     submitBtn.disabled = true;
@@ -136,7 +236,7 @@ $("#menu-form").addEventListener("submit", async (e) => {
     : await api("admin/menu", { method: "POST", body: JSON.stringify(payload) });
 
   submitBtn.disabled = false;
-  if (error) { if (msg) { msg.textContent = "No se pudo guardar."; msg.className = "msg error"; } return; }
+  if (error) { if (msg) { msg.textContent = (typeof error.message === "string" && error.message.length > 6) ? error.message : "No se pudo guardar."; msg.className = "msg error"; } return; }
 
   form.reset();
   $("#menu-image-preview").hidden = true;
@@ -153,7 +253,7 @@ $("#menu-cancel").addEventListener("click", () => {
   selectedImageBlob = null;
 });
 
-$("#menu-table").addEventListener("click", async (e) => {
+$("#menu-table-container").addEventListener("click", async (e) => {
   const editId = e.target.dataset.edit;
   const delId = e.target.dataset.del;
   if (editId) {
