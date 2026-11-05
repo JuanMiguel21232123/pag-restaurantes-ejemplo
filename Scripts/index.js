@@ -151,8 +151,19 @@ function buildOrderText() {
     return `${qty} x ${it.name} — ${money(it.price * qty)}`;
   }).filter(Boolean);
   if (!lines.length) return "";
+
+  const paymentLabel = orderCustomer.payment === "nequi" ? "Nequi" : "Efectivo";
+  const customerLines = [
+    `Nombre: ${orderCustomer.name.trim()}`,
+    `Teléfono: ${orderCustomer.phone.trim()}`,
+    orderCustomer.address.trim() ? `Dirección: ${orderCustomer.address.trim()}` : null,
+    `Pago: ${paymentLabel}`,
+  ].filter(Boolean);
+
   return [
     `Hola, quiero hacer este pedido en ${business}:`,
+    "",
+    ...customerLines,
     "",
     ...lines,
     "",
@@ -184,20 +195,25 @@ function renderOrderModal() {
     }).join("");
   }
   $("#order-total").textContent = money(orderTotal());
-  const waBtn = $("#order-wa");
-  const clearBtn = $("#order-clear");
-  if (entries.length) {
-    waBtn.hidden = false;
-    waBtn.href = waLink(buildOrderText());
-    clearBtn.hidden = false;
-  } else {
-    waBtn.hidden = true;
-    clearBtn.hidden = true;
-  }
+  const hasItems = entries.length > 0;
+  $("#order-customer-form").hidden = !hasItems;
+  $("#order-send").hidden = !hasItems;
+  $("#order-clear").hidden = !hasItems;
+}
+
+function fillCustomerForm() {
+  const form = $("#order-customer-form");
+  form.name.value = orderCustomer.name;
+  form.phone.value = orderCustomer.phone;
+  form.address.value = orderCustomer.address;
+  const radio = form.querySelector(`input[name=payment][value="${orderCustomer.payment}"]`);
+  if (radio) radio.checked = true;
 }
 
 function openOrderModal() {
+  fillCustomerForm();
   renderOrderModal();
+  $("#order-msg").textContent = "";
   $("#order-modal").hidden = false;
 }
 
@@ -214,6 +230,31 @@ function setupOrder() {
   $("#order-fab").addEventListener("click", openOrderModal);
   $("#order-modal-close").addEventListener("click", closeOrderModal);
   $("#order-modal").addEventListener("click", (e) => { if (e.target.id === "order-modal") closeOrderModal(); });
+
+  const customerForm = $("#order-customer-form");
+  customerForm.addEventListener("input", () => {
+    orderCustomer.name = customerForm.name.value;
+    orderCustomer.phone = customerForm.phone.value;
+    orderCustomer.address = customerForm.address.value;
+    saveOrderCustomer();
+  });
+  customerForm.addEventListener("change", (e) => {
+    if (e.target.name === "payment") {
+      orderCustomer.payment = customerForm.payment.value;
+      saveOrderCustomer();
+    }
+  });
+
+  $("#order-send").addEventListener("click", () => {
+    const msg = $("#order-msg");
+    if (!orderCustomer.name.trim() || !orderCustomer.phone.trim()) {
+      msg.textContent = "Completa tu nombre y teléfono para enviar el pedido.";
+      msg.className = "form-status error";
+      return;
+    }
+    msg.textContent = "";
+    window.open(waLink(buildOrderText()), "_blank", "noopener");
+  });
 
   $("#order-clear").addEventListener("click", () => {
     if (!Object.keys(order).length) return;
