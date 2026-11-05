@@ -5,6 +5,7 @@
   --serif:'Fraunces', Georgia, serif; --sans:'Inter', sans-serif;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
+[hidden]{display:none !important;}
 body{background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh;}
 button{font-family:var(--sans); cursor:pointer;}
 input{font-family:var(--sans);}
