@@ -42,6 +42,7 @@
     <div class="wrap">
       <div class="eyebrow">Carta · actualizada en tiempo real</div>
       <h2>Nuestro menú</h2>
+      <p class="menu-hint">Toca un platillo para ver el detalle, o usa "Agregar" para sumarlo a tu pedido.</p>
       <div id="menu-grid" class="menu-grid">
         <p class="menu-empty">Cargando menú…</p>
       </div>
@@ -124,6 +125,25 @@
       <h3 id="dish-modal-title"></h3>
       <p id="dish-modal-desc"></p>
       <span id="dish-modal-price" class="modal-price"></span>
+      <div id="dish-modal-actions" class="dish-modal-actions"></div>
+    </div>
+  </div>
+</div>
+
+<button id="order-fab" class="order-fab" type="button" hidden>
+  <span class="order-fab-label">Tu pedido</span>
+  <span id="order-fab-count" class="order-fab-count">0</span>
+</button>
+
+<div id="order-modal" class="modal-backdrop" hidden>
+  <div class="modal order-modal-box" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+    <button id="order-modal-close" class="modal-close" type="button" aria-label="Cerrar">✕</button>
+    <div class="modal-body">
+      <h3 id="order-modal-title">Tu pedido</h3>
+      <div id="order-items"></div>
+      <div class="order-total">Total: <strong id="order-total"></strong></div>
+      <a id="order-wa" class="btn-primary" target="_blank" rel="noopener noreferrer" href="#">Enviar pedido por WhatsApp ↗</a>
+      <button id="order-clear" class="btn-ghost" type="button">Vaciar pedido</button>
     </div>
   </div>
 </div>

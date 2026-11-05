@@ -1,11 +1,71 @@
-// Portada: menú real desde Turso + formulario de reservas conectado a /api/reservations.
+// Portada: menú real desde Turso + formulario de reservas + "Tu pedido" (selección de platillos por WhatsApp).
 
 let menuData = [];
+let order = loadOrder(); // { "<id>": cantidad }
 
+// ---------- Persistencia del pedido (localStorage del cliente) ----------
+function loadOrder() {
+  try {
+    const raw = localStorage.getItem("parrilla_pedido");
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveOrder() {
+  try { localStorage.setItem("parrilla_pedido", JSON.stringify(order)); } catch (e) {}
+}
+
+function orderCount() {
+  return Object.values(order).reduce((sum, qty) => sum + qty, 0);
+}
+
+function orderTotal() {
+  return Object.entries(order).reduce((sum, [id, qty]) => {
+    const it = menuData.find((x) => String(x.id) === String(id));
+    return sum + (it ? it.price * qty : 0);
+  }, 0);
+}
+
+function changeOrderQty(id, delta) {
+  const it = menuData.find((x) => String(x.id) === String(id));
+  if (!it) return;
+  const next = Math.max(0, (order[id] || 0) + delta);
+  if (next === 0) delete order[id]; else order[id] = next;
+  saveOrder();
+  refreshCardActions(id);
+  refreshOrderUI();
+}
+
+// ---------- Menú ----------
 function dishImage(it, cls) {
   return it.image_url
     ? `<img src="${esc(it.image_url)}" alt="${esc(it.name)}" loading="lazy">`
     : `<span class="${cls}-placeholder">${esc((it.name || "?").trim().slice(0, 1).toUpperCase())}</span>`;
+}
+
+function cardActionsHTML(id) {
+  const qty = order[id] || 0;
+  if (!qty) {
+    return `<button class="btn-add" type="button" data-add="${id}">Agregar al pedido</button>`;
+  }
+  return `
+    <div class="qty-stepper">
+      <button type="button" data-dec="${id}" aria-label="Quitar uno">−</button>
+      <span>${qty}</span>
+      <button type="button" data-inc="${id}" aria-label="Agregar uno">+</button>
+    </div>`;
+}
+
+function refreshCardActions(id) {
+  const el = document.querySelector(`[data-actions="${CSS.escape(String(id))}"]`);
+  if (el) el.innerHTML = cardActionsHTML(id);
+  const modalTitle = $("#dish-modal-title");
+  if (modalTitle && !$("#dish-modal").hidden && modalTitle.dataset.id === String(id)) {
+    $("#dish-modal-actions").innerHTML = cardActionsHTML(id);
+  }
 }
 
 async function renderMenu() {
@@ -16,20 +76,28 @@ async function renderMenu() {
     return;
   }
   menuData = data;
+  renderMenuGrid();
+}
+
+function renderMenuGrid() {
+  const grid = $("#menu-grid");
   const groups = {};
-  data.forEach((item) => (groups[item.category || "General"] ||= []).push(item));
+  menuData.forEach((item) => (groups[item.category || "General"] ||= []).push(item));
   grid.innerHTML = Object.entries(groups).map(([cat, items]) => `
     <div class="menu-group">
       <h4>${esc(cat)}</h4>
       <div class="menu-cards">
         ${items.map((it) => `
-          <button class="menu-card" type="button" data-id="${it.id}">
-            <div class="menu-card-img">${dishImage(it, "menu-card")}</div>
-            <div class="menu-card-body">
-              <span class="name">${esc(it.name)}</span>
-              <span class="price">${money(it.price)}</span>
-            </div>
-          </button>`).join("")}
+          <div class="menu-card">
+            <button class="menu-card-view" type="button" data-view="${it.id}">
+              <div class="menu-card-img">${dishImage(it, "menu-card")}</div>
+              <div class="menu-card-body">
+                <span class="name">${esc(it.name)}</span>
+                <span class="price">${money(it.price)}</span>
+              </div>
+            </button>
+            <div class="menu-card-actions" data-actions="${it.id}">${cardActionsHTML(it.id)}</div>
+          </div>`).join("")}
       </div>
     </div>`).join("");
 }
@@ -38,24 +106,124 @@ function openDishModal(id) {
   const it = menuData.find((x) => String(x.id) === String(id));
   if (!it) return;
   $("#dish-modal-title").textContent = it.name;
+  $("#dish-modal-title").dataset.id = String(it.id);
   $("#dish-modal-desc").textContent = it.description || "Sin descripción adicional.";
   $("#dish-modal-price").textContent = money(it.price);
   $("#dish-modal-image").innerHTML = dishImage(it, "modal");
+  $("#dish-modal-actions").innerHTML = cardActionsHTML(it.id);
   $("#dish-modal").hidden = false;
 }
 
 function closeDishModal() { $("#dish-modal").hidden = true; }
 
 function setupMenuModal() {
-  $("#menu-grid").addEventListener("click", (e) => {
-    const card = e.target.closest(".menu-card");
-    if (card) openDishModal(card.dataset.id);
-  });
   $("#dish-modal-close").addEventListener("click", closeDishModal);
   $("#dish-modal").addEventListener("click", (e) => { if (e.target.id === "dish-modal") closeDishModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDishModal(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    closeDishModal();
+    closeOrderModal();
+  });
 }
 
+// ---------- Tu pedido ----------
+function buildOrderText() {
+  const business = typeof BUSINESS !== "undefined" ? BUSINESS : "";
+  const lines = Object.entries(order).map(([id, qty]) => {
+    const it = menuData.find((x) => String(x.id) === String(id));
+    if (!it) return null;
+    return `${qty} x ${it.name} — ${money(it.price * qty)}`;
+  }).filter(Boolean);
+  if (!lines.length) return "";
+  return [
+    `Hola, quiero hacer este pedido en ${business}:`,
+    "",
+    ...lines,
+    "",
+    `Total: ${money(orderTotal())}`,
+  ].join("\n");
+}
+
+function renderOrderModal() {
+  const entries = Object.entries(order);
+  const container = $("#order-items");
+  if (!entries.length) {
+    container.innerHTML = '<p class="order-empty">Todavía no has agregado platillos a tu pedido.</p>';
+  } else {
+    container.innerHTML = entries.map(([id, qty]) => {
+      const it = menuData.find((x) => String(x.id) === String(id));
+      if (!it) return "";
+      return `
+        <div class="order-item">
+          <div class="order-item-info">
+            <span class="name">${esc(it.name)}</span>
+            <span class="price">${money(it.price)} c/u</span>
+          </div>
+          <div class="qty-stepper">
+            <button type="button" data-dec="${id}" aria-label="Quitar uno">−</button>
+            <span>${qty}</span>
+            <button type="button" data-inc="${id}" aria-label="Agregar uno">+</button>
+          </div>
+        </div>`;
+    }).join("");
+  }
+  $("#order-total").textContent = money(orderTotal());
+  const waBtn = $("#order-wa");
+  const clearBtn = $("#order-clear");
+  if (entries.length) {
+    waBtn.hidden = false;
+    waBtn.href = waLink(buildOrderText());
+    clearBtn.hidden = false;
+  } else {
+    waBtn.hidden = true;
+    clearBtn.hidden = true;
+  }
+}
+
+function openOrderModal() {
+  renderOrderModal();
+  $("#order-modal").hidden = false;
+}
+
+function closeOrderModal() { $("#order-modal").hidden = true; }
+
+function refreshOrderUI() {
+  const count = orderCount();
+  $("#order-fab").hidden = count === 0;
+  $("#order-fab-count").textContent = count;
+  if (!$("#order-modal").hidden) renderOrderModal();
+}
+
+function setupOrder() {
+  $("#order-fab").addEventListener("click", openOrderModal);
+  $("#order-modal-close").addEventListener("click", closeOrderModal);
+  $("#order-modal").addEventListener("click", (e) => { if (e.target.id === "order-modal") closeOrderModal(); });
+
+  $("#order-clear").addEventListener("click", () => {
+    if (!Object.keys(order).length) return;
+    if (!confirm("¿Vaciar tu pedido?")) return;
+    order = {};
+    saveOrder();
+    renderMenuGrid();
+    refreshOrderUI();
+  });
+
+  // Delegación global: agregar / quitar / abrir detalle, tanto en las tarjetas del menú como en los modales.
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest("[data-add]");
+    if (addBtn) { changeOrderQty(addBtn.dataset.add, 1); return; }
+    const incBtn = e.target.closest("[data-inc]");
+    if (incBtn) { changeOrderQty(incBtn.dataset.inc, 1); return; }
+    const decBtn = e.target.closest("[data-dec]");
+    if (decBtn) { changeOrderQty(decBtn.dataset.dec, -1); return; }
+    const viewBtn = e.target.closest("[data-view]");
+    if (viewBtn) { openDishModal(viewBtn.dataset.view); return; }
+  });
+
+  refreshOrderUI();
+}
+
+// ---------- Reservas ----------
 function setupReservationForm() {
   const dateInput = $("#r-date");
   if (dateInput) dateInput.min = new Date().toISOString().slice(0, 10);
@@ -126,6 +294,7 @@ function setupTabs() {
 
 setupTabs();
 setupMenuModal();
+setupOrder();
 loadSettings();
 renderMenu();
 setupReservationForm();
