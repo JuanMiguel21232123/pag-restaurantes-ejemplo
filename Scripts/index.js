@@ -24,6 +24,9 @@ async function renderMenu() {
 }
 
 function setupReservationForm() {
+  const dateInput = $("#r-date");
+  if (dateInput) dateInput.min = new Date().toISOString().slice(0, 10);
+
   const form = $("#reservation-form");
   const status = $("#form-status");
   const done = $("#reservation-done");

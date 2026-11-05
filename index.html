@@ -49,11 +49,11 @@
     <h2>Resérvanos tu mesa</h2>
     <form id="reservation-form" class="reservation-form" novalidate>
       <div class="field-row">
-        <input type="text" name="name" placeholder="Nombre" required>
-        <input type="number" name="guests" placeholder="Personas" min="1" max="30" required>
+        <input type="text" name="name" placeholder="Nombre" maxlength="60" required>
+        <input type="number" name="guests" placeholder="Personas" min="1" max="15" required>
       </div>
       <div class="field-row">
-        <input type="date" name="date" required>
+        <input type="date" name="date" id="r-date" required>
         <select name="time" required>
           <option value="" disabled selected>Hora</option>
           <option value="12:00">12:00 m</option>

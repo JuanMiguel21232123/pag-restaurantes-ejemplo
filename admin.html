@@ -38,10 +38,10 @@
   <section id="tab-menu" class="tab-panel">
     <form id="menu-form" class="inline-form">
       <input type="hidden" name="id">
-      <input type="text" name="name" placeholder="Nombre del platillo" required>
-      <input type="text" name="category" placeholder="Categoría (ej. Fuertes)">
-      <input type="number" name="price" placeholder="Precio en COP (ej. 25000)" step="500" min="0" required>
-      <input type="text" name="description" placeholder="Descripción (opcional)">
+      <input type="text" name="name" placeholder="Nombre del platillo" maxlength="80" required>
+      <input type="text" name="category" placeholder="Categoría (ej. Fuertes)" maxlength="40">
+      <input type="number" name="price" placeholder="Precio en COP (ej. 25000)" step="500" min="0" max="2000000" required>
+      <input type="text" name="description" placeholder="Descripción (opcional)" maxlength="200">
       <button type="submit" class="btn-primary">Guardar</button>
       <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
     </form>

@@ -74,9 +74,10 @@ async function createReservation(request, env) {
   const name = String(b.name || "").trim();
   const date = String(b.date || "").trim();
   const time = String(b.time || "").trim();
-  const guests = Math.max(1, Math.min(30, Number(b.guests) || 1));
+  const guests = Math.max(1, Math.min(15, Number(b.guests) || 1));
   const email = String(b.email || "").trim();
-  if (name.length < 2 || !date || !time) return err("data");
+  const today = new Date().toISOString().slice(0, 10);
+  if (name.length < 2 || name.length > 60 || !date || date < today || !time) return err("data");
 
   const code = await uniqueCode(env);
   await turso(env,
@@ -137,7 +138,9 @@ async function getAdminMenu(request, env) {
 }
 
 function validMenuBody(b) {
-  if (!b || !String(b.name || "").trim() || !Number.isFinite(Number(b.price)) || Number(b.price) < 0) return "data";
+  const name = String(b?.name || "").trim();
+  const price = Number(b?.price);
+  if (!name || name.length > 80 || !Number.isFinite(price) || price < 0 || price > 2000000) return "data";
   return null;
 }
 
