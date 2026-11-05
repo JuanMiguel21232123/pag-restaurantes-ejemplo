@@ -39,6 +39,16 @@ document.querySelectorAll(".tab").forEach((btn) => {
   });
 });
 
+// ---------- Sub-pestañas de Menú: Agregar / Ver ----------
+function goToSubtab(name) {
+  document.querySelectorAll(".subtab").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.subtab === name)));
+  document.querySelectorAll(".subtab-panel").forEach((p) => (p.hidden = p.id !== "submenu-" + name));
+}
+
+document.querySelectorAll(".subtab").forEach((btn) => {
+  btn.addEventListener("click", () => goToSubtab(btn.dataset.subtab));
+});
+
 // ---------- Secciones (categorías) ----------
 async function loadCategories() {
   const { data } = await api("admin/categories");
@@ -244,6 +254,7 @@ $("#menu-form").addEventListener("submit", async (e) => {
   selectedImageBlob = null;
   if (msg) msg.textContent = "";
   await loadMenu();
+  goToSubtab("list");
 });
 
 $("#menu-cancel").addEventListener("click", () => {
@@ -271,6 +282,7 @@ $("#menu-table-container").addEventListener("click", async (e) => {
     const preview = $("#menu-image-preview");
     if (it.image_url) { preview.src = it.image_url; preview.hidden = false; } else { preview.hidden = true; }
     $("#menu-cancel").hidden = false;
+    goToSubtab("add");
   }
   if (delId) {
     if (!confirm("¿Eliminar este platillo?")) return;

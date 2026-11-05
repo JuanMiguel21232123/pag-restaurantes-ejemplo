@@ -37,25 +37,35 @@
   </nav>
 
   <section id="tab-menu" class="tab-panel">
-    <form id="menu-form" class="inline-form">
-      <input type="hidden" name="id">
-      <input type="text" name="name" placeholder="Nombre del platillo" maxlength="80" required>
-      <select name="category" required>
-        <option value="" disabled selected>Sección</option>
-      </select>
-      <input type="number" name="price" placeholder="Precio en COP (ej. 17950)" step="1" min="0" max="2000000" required>
-      <input type="text" name="description" placeholder="Descripción (opcional)" maxlength="200">
-      <input type="hidden" name="image_url">
-      <label class="image-field">
-        <span>Foto</span>
-        <input type="file" id="menu-image-input" accept="image/*">
-      </label>
-      <img id="menu-image-preview" class="menu-image-preview" hidden>
-      <button type="submit" class="btn-primary">Guardar</button>
-      <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
-      <p id="menu-msg" class="msg"></p>
-    </form>
-    <div id="menu-table-container"></div>
+    <nav class="subtabs">
+      <button class="subtab" data-subtab="add" aria-pressed="true">Agregar platillo</button>
+      <button class="subtab" data-subtab="list" aria-pressed="false">Ver platillos</button>
+    </nav>
+
+    <div id="submenu-add" class="subtab-panel">
+      <form id="menu-form" class="inline-form">
+        <input type="hidden" name="id">
+        <input type="text" name="name" placeholder="Nombre del platillo" maxlength="80" required>
+        <select name="category" required>
+          <option value="" disabled selected>Sección</option>
+        </select>
+        <input type="number" name="price" placeholder="Precio en COP (ej. 17950)" step="1" min="0" max="2000000" required>
+        <input type="text" name="description" placeholder="Descripción (opcional)" maxlength="200">
+        <input type="hidden" name="image_url">
+        <label class="image-field">
+          <span>Foto</span>
+          <input type="file" id="menu-image-input" accept="image/*">
+        </label>
+        <img id="menu-image-preview" class="menu-image-preview" hidden>
+        <button type="submit" class="btn-primary">Guardar</button>
+        <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+        <p id="menu-msg" class="msg"></p>
+      </form>
+    </div>
+
+    <div id="submenu-list" class="subtab-panel" hidden>
+      <div id="menu-table-container"></div>
+    </div>
   </section>
 
   <section id="tab-categories" class="tab-panel" hidden>
