@@ -107,6 +107,11 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 .field-row{display:flex; gap:10px;}
 .reservation-form input, .reservation-form select{flex:1; background:var(--bg-card); border:1px solid var(--line); color:var(--text); padding:11px 14px; border-radius:3px; font-family:var(--sans); font-size:.92rem; min-width:0;}
 .reservation-form input:focus, .btn-form:focus-visible, .nav-cta:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+.date-field{position:relative; flex:1; display:flex; min-width:0;}
+.date-field-label{position:absolute; top:-8px; left:11px; background:var(--bg-card); padding:0 5px; font-size:.7rem; color:var(--text-muted); pointer-events:none; z-index:1;}
+.date-field input[type=date]{width:100%; color-scheme:dark;}
+.date-field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.75) sepia(1) saturate(3) hue-rotate(5deg); cursor:pointer;}
 .form-status{font-size:.85rem; color:var(--text-muted); min-height:1.2em;}
 .form-status.ok{color:var(--gold-soft);}
 .form-status.error{color:#c97a6b;}
