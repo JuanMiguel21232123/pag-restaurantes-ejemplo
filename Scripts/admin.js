@@ -12,6 +12,7 @@ function showPanel(name) {
   $("#admin-name").textContent = name;
   loadMenu();
   loadReservations();
+  loadSettingsForm();
 }
 
 $("#login-form").addEventListener("submit", async (e) => {
@@ -136,6 +137,35 @@ $("#reservations-table").addEventListener("click", async (e) => {
   if (!confirm("¿Eliminar esta reserva?")) return;
   await api("admin/reservations/" + id, { method: "DELETE" });
   await loadReservations();
+});
+
+// ---------- Configuración general ----------
+async function loadSettingsForm() {
+  const { data } = await api("public/settings");
+  if (!data) return;
+  const form = $("#settings-form");
+  if (data.hero_title) form.hero_title.value = data.hero_title;
+  if (data.hero_text) form.hero_text.value = data.hero_text;
+  if (data.whatsapp) form.whatsapp.value = data.whatsapp;
+}
+
+$("#settings-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = $("#settings-msg");
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  const set = {};
+  Object.entries(payload).forEach(([k, v]) => { if (String(v).trim()) set[k] = String(v).trim(); });
+
+  msg.textContent = "Guardando…";
+  msg.className = "msg";
+  const { error } = await api("admin/settings", { method: "PATCH", body: JSON.stringify({ set }) });
+  if (error) {
+    msg.textContent = "No se pudo guardar. Intenta de nuevo.";
+    msg.className = "msg error";
+    return;
+  }
+  msg.textContent = "Cambios guardados. Recarga el sitio público para verlos.";
+  msg.className = "msg ok";
 });
 
 checkSession();

@@ -26,6 +26,8 @@ async function renderMenu() {
 function setupReservationForm() {
   const form = $("#reservation-form");
   const status = $("#form-status");
+  const done = $("#reservation-done");
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const payload = Object.fromEntries(new FormData(form).entries());
@@ -46,9 +48,26 @@ function setupReservationForm() {
       status.className = "form-status error";
       return;
     }
-    status.textContent = `¡Reserva guardada! Código ${data.code}. Te confirmamos pronto.`;
-    status.className = "form-status ok";
+
+    const text = [
+      `Hola, acabo de hacer la reserva ${data.code} en ${BUSINESS}:`,
+      `Nombre: ${payload.name}`,
+      `Fecha: ${payload.date} a las ${payload.time}`,
+      `Personas: ${payload.guests}`,
+      payload.email ? `Correo: ${payload.email}` : "",
+    ].filter(Boolean).join("\n");
+
+    $("#done-code").textContent = "Código " + data.code;
+    $("#done-wa").href = waLink(text);
+    form.hidden = true;
+    done.hidden = false;
+  });
+
+  $("#done-close").addEventListener("click", () => {
     form.reset();
+    status.textContent = "";
+    form.hidden = false;
+    done.hidden = true;
   });
 }
 

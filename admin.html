@@ -24,6 +24,7 @@
     <div class="brand">La Parrilla del Valle · admin</div>
     <div class="panel-head-right">
       <span id="admin-name"></span>
+      <a href="index.html" target="_blank" rel="noopener noreferrer" class="btn-ghost">Ver sitio ↗</a>
       <button id="logout" class="btn-ghost">Salir</button>
     </div>
   </header>
@@ -31,6 +32,7 @@
   <nav class="tabs">
     <button class="tab" data-tab="menu" aria-pressed="true">Menú</button>
     <button class="tab" data-tab="reservations" aria-pressed="false">Reservas</button>
+    <button class="tab" data-tab="settings" aria-pressed="false">Configuración</button>
   </nav>
 
   <section id="tab-menu" class="tab-panel">
@@ -38,7 +40,7 @@
       <input type="hidden" name="id">
       <input type="text" name="name" placeholder="Nombre del platillo" required>
       <input type="text" name="category" placeholder="Categoría (ej. Fuertes)">
-      <input type="number" name="price" placeholder="Precio" step="0.01" min="0" required>
+      <input type="number" name="price" placeholder="Precio en COP (ej. 25000)" step="500" min="0" required>
       <input type="text" name="description" placeholder="Descripción (opcional)">
       <button type="submit" class="btn-primary">Guardar</button>
       <button type="button" id="menu-cancel" class="btn-ghost" hidden>Cancelar edición</button>
@@ -54,6 +56,22 @@
       <thead><tr><th>Código</th><th>Nombre</th><th>Fecha</th><th>Hora</th><th>Personas</th><th>Estado</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
+  </section>
+
+  <section id="tab-settings" class="tab-panel" hidden>
+    <form id="settings-form" class="settings-form">
+      <label>Título principal (portada)
+        <input type="text" name="hero_title" placeholder="Cocina de fuego lento, en el corazón del valle.">
+      </label>
+      <label>Texto debajo del título
+        <textarea name="hero_text" rows="2" placeholder="Carnes a la parrilla, ingredientes locales..."></textarea>
+      </label>
+      <label>Número de WhatsApp (solo números, con código de país, sin + ni espacios)
+        <input type="text" name="whatsapp" placeholder="573001234567" pattern="[0-9]{10,15}">
+      </label>
+      <button type="submit" class="btn-primary">Guardar cambios</button>
+      <p id="settings-msg" class="msg"></p>
+    </form>
   </section>
 </div>
 
