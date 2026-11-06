@@ -42,6 +42,7 @@
     <button class="tab" data-tab="categories" aria-pressed="false">Secciones</button>
     <button class="tab" data-tab="reservations" aria-pressed="false">Reservas</button>
     <button class="tab" data-tab="settings" aria-pressed="false">Configuración</button>
+    <button class="tab" data-tab="sales" aria-pressed="false">Ventas y Gastos</button>
   </nav>
 
   <section id="tab-menu" class="tab-panel">
@@ -126,8 +127,60 @@
       <p id="settings-msg" class="msg"></p>
     </form>
   </section>
+
+  <section id="tab-sales" class="tab-panel" hidden>
+    <div class="sales-head">
+      <button id="export-excel" type="button" class="btn-primary">Descargar Excel (ventas y gastos) ⬇</button>
+    </div>
+
+    <nav class="subtabs2">
+      <button class="subtab2" data-subtab2="orders" aria-pressed="true">Pedidos web</button>
+      <button class="subtab2" data-subtab2="cash" aria-pressed="false">Caja (venta rápida)</button>
+      <button class="subtab2" data-subtab2="expenses" aria-pressed="false">Gastos</button>
+    </nav>
+
+    <div id="salessub-orders" class="subtab2-panel">
+      <div class="data-table-wrap">
+        <table class="data-table" id="orders-table">
+          <thead><tr><th>Fecha</th><th>Cliente</th><th>Detalle</th><th>Total</th><th>Pago</th><th>Estado</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="salessub-cash" class="subtab2-panel" hidden>
+      <form id="cash-sale-form" class="inline-form">
+        <input type="number" name="amount" placeholder="Monto COP" min="1" step="1" required>
+        <input type="text" name="note" placeholder="Nota (opcional, ej. Mesa 4)" maxlength="200">
+        <button type="submit" class="btn-primary">Registrar venta</button>
+      </form>
+      <p id="cash-sale-msg" class="msg"></p>
+      <div class="data-table-wrap">
+        <table class="data-table" id="cash-sales-table">
+          <thead><tr><th>Fecha</th><th>Nota</th><th>Monto</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="salessub-expenses" class="subtab2-panel" hidden>
+      <form id="expense-form" class="inline-form">
+        <input type="text" name="description" placeholder="Descripción del gasto" maxlength="200" required>
+        <input type="number" name="amount" placeholder="Monto COP" min="1" step="1" required>
+        <button type="submit" class="btn-primary">Registrar gasto</button>
+      </form>
+      <p id="expense-msg" class="msg"></p>
+      <div class="data-table-wrap">
+        <table class="data-table" id="expenses-table">
+          <thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="Scripts/config.js"></script>
 <script src="Scripts/site.js"></script>
 <script src="Scripts/admin.js"></script>

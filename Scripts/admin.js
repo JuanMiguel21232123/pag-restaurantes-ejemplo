@@ -14,6 +14,9 @@ function showPanel(name) {
   loadCategories().then(loadMenu);
   loadReservations();
   loadSettingsForm();
+  loadOrders();
+  loadManualSales();
+  loadExpenses();
 }
 
 $("#login-form").addEventListener("submit", async (e) => {
@@ -359,6 +362,191 @@ $("#settings-form").addEventListener("submit", async (e) => {
   }
   msg.textContent = "Cambios guardados. Recarga el sitio público para verlos.";
   msg.className = "msg ok";
+});
+
+// ---------- Sub-pestañas de Ventas y Gastos ----------
+document.querySelectorAll(".subtab2").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".subtab2").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+    document.querySelectorAll(".subtab2-panel").forEach((p) => (p.hidden = p.id !== "salessub-" + btn.dataset.subtab2));
+  });
+});
+
+function fmtDate(s) {
+  return String(s || "").slice(0, 16).replace("T", " ");
+}
+
+// ---------- Pedidos web (ventas) ----------
+let ordersItems = [];
+const ORDER_STATUS_LABEL = { nuevo: "Nuevo", pagado: "Pagado", cancelado: "Cancelado" };
+
+async function loadOrders() {
+  const { data } = await api("admin/orders");
+  ordersItems = data || [];
+  renderOrdersTable();
+}
+
+function orderItemsSummary(order) {
+  try {
+    const items = JSON.parse(order.items || "[]");
+    return items.map((it) => `${it.qty} x ${it.name}`).join(", ");
+  } catch (e) {
+    return "";
+  }
+}
+
+function renderOrdersTable() {
+  $("#orders-table tbody").innerHTML = ordersItems.map((o) => `
+    <tr>
+      <td>${esc(fmtDate(o.created_at))}</td>
+      <td>${esc(o.customer_name || "")}</td>
+      <td>${esc(orderItemsSummary(o))}</td>
+      <td>${money(o.total)}</td>
+      <td>${esc(o.payment_method || "")}</td>
+      <td>
+        <select class="status-select" data-order-id="${o.id}">
+          <option value="nuevo" ${o.status === "nuevo" ? "selected" : ""}>Nuevo</option>
+          <option value="pagado" ${o.status === "pagado" ? "selected" : ""}>Pagado</option>
+          <option value="cancelado" ${o.status === "cancelado" ? "selected" : ""}>Cancelado</option>
+        </select>
+      </td>
+      <td><button data-del-order="${o.id}">Eliminar</button></td>
+    </tr>`).join("") || `<tr><td colspan="7">Sin pedidos todavía.</td></tr>`;
+}
+
+$("#orders-table").addEventListener("change", async (e) => {
+  const sel = e.target.closest(".status-select");
+  if (!sel) return;
+  await api("admin/orders/" + sel.dataset.orderId, { method: "PATCH", body: JSON.stringify({ status: sel.value }) });
+  await loadOrders();
+});
+
+$("#orders-table").addEventListener("click", async (e) => {
+  const id = e.target.dataset.delOrder;
+  if (!id) return;
+  if (!confirm("¿Eliminar este pedido?")) return;
+  await api("admin/orders/" + id, { method: "DELETE" });
+  await loadOrders();
+});
+
+// ---------- Caja (ventas registradas a mano) ----------
+let cashSalesItems = [];
+
+async function loadManualSales() {
+  const { data } = await api("admin/manual-sales");
+  cashSalesItems = data || [];
+  renderCashSalesTable();
+}
+
+function renderCashSalesTable() {
+  $("#cash-sales-table tbody").innerHTML = cashSalesItems.map((s) => `
+    <tr>
+      <td>${esc(fmtDate(s.created_at))}</td>
+      <td>${esc(s.note || "")}</td>
+      <td>${money(s.amount)}</td>
+      <td><button data-del-cash="${s.id}">Eliminar</button></td>
+    </tr>`).join("") || `<tr><td colspan="4">Sin ventas de caja todavía.</td></tr>`;
+}
+
+$("#cash-sale-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = $("#cash-sale-msg");
+  const payload = Object.fromEntries(new FormData(form).entries());
+  const { error } = await api("admin/manual-sales", { method: "POST", body: JSON.stringify(payload) });
+  if (error) { if (msg) { msg.textContent = error.message || "No se pudo guardar."; msg.className = "msg error"; } return; }
+  form.reset();
+  if (msg) msg.textContent = "";
+  await loadManualSales();
+});
+
+$("#cash-sales-table").addEventListener("click", async (e) => {
+  const id = e.target.dataset.delCash;
+  if (!id) return;
+  if (!confirm("¿Eliminar esta venta?")) return;
+  await api("admin/manual-sales/" + id, { method: "DELETE" });
+  await loadManualSales();
+});
+
+// ---------- Gastos ----------
+let expensesItems = [];
+
+async function loadExpenses() {
+  const { data } = await api("admin/expenses");
+  expensesItems = data || [];
+  renderExpensesTable();
+}
+
+function renderExpensesTable() {
+  $("#expenses-table tbody").innerHTML = expensesItems.map((g) => `
+    <tr>
+      <td>${esc(fmtDate(g.created_at))}</td>
+      <td>${esc(g.description)}</td>
+      <td>${money(g.amount)}</td>
+      <td><button data-del-expense="${g.id}">Eliminar</button></td>
+    </tr>`).join("") || `<tr><td colspan="4">Sin gastos todavía.</td></tr>`;
+}
+
+$("#expense-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const msg = $("#expense-msg");
+  const payload = Object.fromEntries(new FormData(form).entries());
+  const { error } = await api("admin/expenses", { method: "POST", body: JSON.stringify(payload) });
+  if (error) { if (msg) { msg.textContent = error.message || "No se pudo guardar."; msg.className = "msg error"; } return; }
+  form.reset();
+  if (msg) msg.textContent = "";
+  await loadExpenses();
+});
+
+$("#expenses-table").addEventListener("click", async (e) => {
+  const id = e.target.dataset.delExpense;
+  if (!id) return;
+  if (!confirm("¿Eliminar este gasto?")) return;
+  await api("admin/expenses/" + id, { method: "DELETE" });
+  await loadExpenses();
+});
+
+// ---------- Exportar a Excel (una hoja de Ventas, una de Gastos) ----------
+$("#export-excel").addEventListener("click", () => {
+  if (typeof XLSX === "undefined") {
+    alert("No se pudo cargar el generador de Excel. Revisa tu conexión e intenta de nuevo.");
+    return;
+  }
+
+  const ventasRows = [
+    ["Fecha", "Origen", "Cliente / Nota", "Detalle", "Pago", "Estado", "Total"],
+    ...ordersItems.map((o) => [
+      fmtDate(o.created_at),
+      "Pedido web",
+      o.customer_name || "",
+      orderItemsSummary(o),
+      o.payment_method || "",
+      ORDER_STATUS_LABEL[o.status] || o.status,
+      Number(o.total) || 0,
+    ]),
+    ...cashSalesItems.map((s) => [
+      fmtDate(s.created_at),
+      "Caja",
+      s.note || "",
+      "",
+      "",
+      "",
+      Number(s.amount) || 0,
+    ]),
+  ];
+
+  const gastosRows = [
+    ["Fecha", "Descripción", "Monto"],
+    ...expensesItems.map((g) => [fmtDate(g.created_at), g.description, Number(g.amount) || 0]),
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ventasRows), "Ventas");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(gastosRows), "Gastos");
+
+  const today = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `ventas-gastos-${today}.xlsx`);
 });
 
 checkSession();

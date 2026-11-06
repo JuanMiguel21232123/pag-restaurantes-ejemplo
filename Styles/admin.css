@@ -36,6 +36,12 @@ input{font-family:var(--sans);}
 .subtab[aria-pressed="true"]{color:var(--gold-soft); border-bottom-color:var(--gold);}
 .subtab-panel{min-height:120px;}
 
+.sales-head{margin-bottom:22px;}
+.subtabs2{display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:16px;}
+.subtab2{background:none; border:none; color:var(--text-muted); padding:7px 4px; font-size:.88rem; border-bottom:2px solid transparent;}
+.subtab2[aria-pressed="true"]{color:var(--gold-soft); border-bottom-color:var(--gold);}
+.subtab2-panel{min-height:120px;}
+
 .inline-form{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; align-items:center;}
 .inline-form input, .inline-form select{background:var(--bg-alt); border:1px solid var(--line); color:var(--text); padding:9px 12px; border-radius:3px; font-size:.9rem;}
 .inline-form input[name=name], .inline-form input[name=description]{flex:1; min-width:160px;}

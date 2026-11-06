@@ -39,6 +39,27 @@ export async function onRequest({ request, env, params }) {
 
     // ---------- Admin: personalización ----------
     if (path === "admin/settings" && method === "PATCH") return updateSettings(request, env);
+
+    // ---------- Público: pedidos (generan venta) ----------
+    if (path === "orders" && method === "POST") return createOrder(request, env);
+
+    // ---------- Admin: pedidos web (ventas) ----------
+    if (path === "admin/orders" && method === "GET") return getAdminOrders(request, env);
+    m = /^admin\/orders\/(\d+)$/.exec(path);
+    if (m && method === "PATCH") return updateOrderStatus(request, env, Number(m[1]));
+    if (m && method === "DELETE") return deleteOrder(request, env, Number(m[1]));
+
+    // ---------- Admin: ventas de caja (en físico) ----------
+    if (path === "admin/manual-sales" && method === "GET") return getManualSales(request, env);
+    if (path === "admin/manual-sales" && method === "POST") return createManualSale(request, env);
+    m = /^admin\/manual-sales\/(\d+)$/.exec(path);
+    if (m && method === "DELETE") return deleteManualSale(request, env, Number(m[1]));
+
+    // ---------- Admin: gastos ----------
+    if (path === "admin/expenses" && method === "GET") return getExpenses(request, env);
+    if (path === "admin/expenses" && method === "POST") return createExpense(request, env);
+    m = /^admin\/expenses\/(\d+)$/.exec(path);
+    if (m && method === "DELETE") return deleteExpense(request, env, Number(m[1]));
   } catch (e) {
     return err("server", 500);
   }
@@ -271,6 +292,109 @@ async function deleteCategory(request, env, id) {
   if (inUse[0]?.n > 0) return err("No puedes eliminar una sección que todavía tiene platillos. Muévelos a otra sección primero.");
 
   await turso(env, "DELETE FROM menu_categories WHERE id = ?", [id]);
+  return json({ ok: true });
+}
+
+// =====================================================================
+// PEDIDOS WEB (VENTAS)
+// =====================================================================
+async function createOrder(request, env) {
+  const b = await request.json().catch(() => null);
+  if (!b) return err("data");
+  const items = Array.isArray(b.items) ? b.items : [];
+  if (!items.length) return err("data");
+  const cleanItems = items
+    .map((it) => ({ name: String(it?.name || "").slice(0, 80), qty: Math.max(1, Number(it?.qty) || 0), price: Number(it?.price) || 0 }))
+    .filter((it) => it.qty > 0);
+  if (!cleanItems.length) return err("data");
+  const total = cleanItems.reduce((sum, it) => sum + it.price * it.qty, 0);
+
+  const { lastInsertRowid: id } = await turso(env,
+    `INSERT INTO orders (items, customer_name, customer_phone, customer_address, payment_method, total, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'nuevo', datetime('now'))`,
+    [
+      JSON.stringify(cleanItems),
+      String(b.customer_name || "").trim().slice(0, 60),
+      String(b.customer_phone || "").trim().slice(0, 20),
+      String(b.customer_address || "").trim().slice(0, 120),
+      String(b.payment_method || "").trim().slice(0, 20),
+      total,
+    ]);
+  return json({ id });
+}
+
+async function getAdminOrders(request, env) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const { rows } = await turso(env, "SELECT * FROM orders ORDER BY created_at DESC");
+  return json(rows);
+}
+
+async function updateOrderStatus(request, env, id) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const { status } = await request.json().catch(() => ({}));
+  if (!["nuevo", "pagado", "cancelado"].includes(status)) return err("data");
+  await turso(env, "UPDATE orders SET status = ? WHERE id = ?", [status, id]);
+  return json({ ok: true });
+}
+
+async function deleteOrder(request, env, id) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  await turso(env, "DELETE FROM orders WHERE id = ?", [id]);
+  return json({ ok: true });
+}
+
+// =====================================================================
+// VENTAS DE CAJA (EN FÍSICO)
+// =====================================================================
+async function getManualSales(request, env) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const { rows } = await turso(env, "SELECT * FROM manual_sales ORDER BY created_at DESC");
+  return json(rows);
+}
+
+async function createManualSale(request, env) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const b = await request.json().catch(() => ({}));
+  const amount = Number(b.amount);
+  if (!Number.isFinite(amount) || amount <= 0) return err("Ingresa un monto válido.");
+  const note = String(b.note || "").trim().slice(0, 200);
+  const { lastInsertRowid: id } = await turso(env,
+    "INSERT INTO manual_sales (amount, note, created_at) VALUES (?, ?, datetime('now'))",
+    [amount, note]);
+  return json({ id });
+}
+
+async function deleteManualSale(request, env, id) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  await turso(env, "DELETE FROM manual_sales WHERE id = ?", [id]);
+  return json({ ok: true });
+}
+
+// =====================================================================
+// GASTOS
+// =====================================================================
+async function getExpenses(request, env) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const { rows } = await turso(env, "SELECT * FROM expenses ORDER BY created_at DESC");
+  return json(rows);
+}
+
+async function createExpense(request, env) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  const b = await request.json().catch(() => ({}));
+  const description = String(b.description || "").trim();
+  const amount = Number(b.amount);
+  if (!description || description.length > 200) return err("Escribe una descripción.");
+  if (!Number.isFinite(amount) || amount <= 0) return err("Ingresa un monto válido.");
+  const { lastInsertRowid: id } = await turso(env,
+    "INSERT INTO expenses (description, amount, created_at) VALUES (?, ?, datetime('now'))",
+    [description, amount]);
+  return json({ id });
+}
+
+async function deleteExpense(request, env, id) {
+  if (!(await requireAdmin(request, env))) return err("auth", 401);
+  await turso(env, "DELETE FROM expenses WHERE id = ?", [id]);
   return json({ ok: true });
 }
 

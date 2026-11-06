@@ -245,7 +245,7 @@ function setupOrder() {
     }
   });
 
-  $("#order-send").addEventListener("click", () => {
+  $("#order-send").addEventListener("click", async () => {
     const msg = $("#order-msg");
     if (!orderCustomer.name.trim() || !orderCustomer.phone.trim() || !orderCustomer.address.trim()) {
       msg.textContent = "Completa tu nombre, teléfono y dirección para enviar el pedido.";
@@ -253,6 +253,28 @@ function setupOrder() {
       return;
     }
     msg.textContent = "";
+    const sendBtn = $("#order-send");
+    sendBtn.disabled = true;
+
+    const items = Object.entries(order).map(([id, qty]) => {
+      const it = menuData.find((x) => String(x.id) === String(id));
+      return it ? { name: it.name, qty, price: it.price } : null;
+    }).filter(Boolean);
+
+    // Se guarda el pedido como venta (estado "nuevo"); si falla el guardado,
+    // igual se deja enviar el mensaje por WhatsApp para no bloquear al cliente.
+    await api("orders", {
+      method: "POST",
+      body: JSON.stringify({
+        items,
+        customer_name: orderCustomer.name,
+        customer_phone: orderCustomer.phone,
+        customer_address: orderCustomer.address,
+        payment_method: orderCustomer.payment,
+      }),
+    });
+
+    sendBtn.disabled = false;
     window.open(waLink(buildOrderText()), "_blank", "noopener");
   });
 
