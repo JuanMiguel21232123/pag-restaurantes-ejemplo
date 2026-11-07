@@ -25,7 +25,7 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 .nav-tab{background:none; border:1px solid var(--line); color:var(--text-muted); padding:9px 18px; border-radius:3px; font-family:var(--sans); font-size:.9rem; cursor:pointer;}
 .nav-tab:hover{color:var(--gold-soft);}
 .nav-tab[aria-pressed="true"]{color:var(--gold-soft); border-color:var(--gold);}
-.tab-panel{min-height:calc(100vh - 73px);}
+.tab-root{min-height:calc(100vh - 73px);}
 
 .hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:56px; align-items:center;}
 .hero h1{font-size:clamp(2.1rem,4.4vw,3.2rem); line-height:1.15; max-width:16ch;}
@@ -40,6 +40,31 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 
 .featured{background:var(--bg-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
 .eyebrow{color:var(--gold); font-size:.85rem; font-family:var(--serif); font-style:italic; margin-bottom:10px;}
+
+/* ---------- Sobre nosotros (portada) ---------- */
+.about{border-bottom:1px solid var(--line);}
+.about-grid{display:grid; grid-template-columns:1.3fr .7fr; gap:56px; align-items:start;}
+.about-copy h2{font-size:clamp(1.6rem,3vw,2.1rem); margin-top:4px;}
+.about-copy p{margin-top:16px; color:var(--text-muted); max-width:52ch;}
+.about-highlights{display:flex; flex-direction:column; gap:20px;}
+.highlight{background:var(--bg-card); border:1px solid var(--line); border-radius:6px; padding:20px 22px; display:flex; flex-direction:column; gap:4px;}
+.highlight-num{font-family:var(--serif); font-style:italic; color:var(--gold); font-size:1.8rem;}
+.highlight-label{color:var(--text-muted); font-size:.85rem;}
+
+/* ---------- Platillos destacados (portada) ---------- */
+.home-featured{background:var(--bg-alt); border-bottom:1px solid var(--line);}
+.home-featured h2{font-size:clamp(1.6rem,3vw,2.1rem); margin-bottom:26px;}
+.home-featured-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:16px; margin-bottom:28px;}
+.home-featured-card{background:var(--bg-card); border:1px solid var(--line); border-radius:6px; overflow:hidden; transition:border-color .2s, transform .2s;}
+.home-featured-card:hover{border-color:var(--gold); transform:translateY(-2px);}
+
+/* ---------- Horario / ubicación / contacto (portada) ---------- */
+.info{border-bottom:1px solid var(--line);}
+.info-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;}
+.info-card{background:var(--bg-card); border:1px solid var(--line); border-radius:6px; padding:26px 24px;}
+.info-card p{color:var(--text-muted); font-size:.95rem;}
+.info-card a{color:var(--gold-soft); text-decoration:none;}
+.info-card a:hover{text-decoration:underline;}
 .menu-hint{color:var(--text-muted); font-size:.9rem; margin-top:-4px;}
 .menu-grid{margin-top:30px;}
 .menu-group{margin-bottom:36px;}
@@ -132,4 +157,8 @@ footer a:hover{color:var(--gold-soft);}
   nav{flex-wrap:wrap; gap:10px; padding:14px 20px;}
   .nav-tab{padding:7px 14px; font-size:.84rem;}
   .order-fab{right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px));}
+  .about-grid{grid-template-columns:1fr; gap:30px;}
+  .about-highlights{flex-direction:row; flex-wrap:wrap;}
+  .highlight{flex:1; min-width:140px;}
+  .info-grid{grid-template-columns:1fr;}
 }

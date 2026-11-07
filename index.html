@@ -49,7 +49,7 @@
 </header>
 
 <main>
-  <section id="tab-inicio" class="tab-panel hero">
+  <section id="tab-inicio" class="tab-panel tab-root hero" data-tab="inicio">
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <h1 data-s="hero_title">Cocina de fuego lento, en el corazón del valle.</h1>
@@ -63,7 +63,63 @@
     </div>
   </section>
 
-  <section id="tab-menu" class="tab-panel featured" hidden>
+  <!-- Sobre nosotros: edita este texto libremente, es contenido fijo (no viene del panel admin). -->
+  <section class="about tab-panel" data-tab="inicio">
+    <div class="wrap about-grid">
+      <div class="about-copy">
+        <div class="eyebrow">Nuestra historia</div>
+        <h2>De la brasa a tu mesa</h2>
+        <p>En La Parrilla del Valle creemos en la cocina honesta: carnes maduradas, brasas de leña y recetas que se cocinan con calma. Trabajamos con productores locales del valle para que cada platillo llegue con el mejor sabor posible.</p>
+        <p>Desde nuestra parrilla abierta hasta tu mesa, cuidamos cada detalle para que cada visita se sienta como una reunión familiar.</p>
+      </div>
+      <div class="about-highlights">
+        <div class="highlight">
+          <span class="highlight-num">100%</span>
+          <span class="highlight-label">Leña y carbón natural</span>
+        </div>
+        <div class="highlight">
+          <span class="highlight-num">7</span>
+          <span class="highlight-label">Días a la semana abiertos</span>
+        </div>
+        <div class="highlight">
+          <span class="highlight-num">+15</span>
+          <span class="highlight-label">Platillos en la carta</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Platillos destacados: se llenan solos con los primeros platillos disponibles del menú real. -->
+  <section class="home-featured tab-panel" data-tab="inicio">
+    <div class="wrap">
+      <div class="eyebrow">Especialidades de la casa</div>
+      <h2>Platillos destacados</h2>
+      <div id="home-featured-grid" class="home-featured-grid">
+        <p class="menu-empty">Cargando platillos…</p>
+      </div>
+      <button class="btn-ghost" type="button" data-goto="menu">Ver todo el menú</button>
+    </div>
+  </section>
+
+  <!-- Horario, ubicación y contacto: edita el texto del horario y la ciudad en Scripts/config.js. -->
+  <section class="info tab-panel" data-tab="inicio">
+    <div class="wrap info-grid">
+      <div class="info-card">
+        <div class="eyebrow">Horario</div>
+        <p>Todos los días<br>12:00 m – 10:00 pm</p>
+      </div>
+      <div class="info-card">
+        <div class="eyebrow">Ubicación</div>
+        <p data-city>Manizales, Colombia</p>
+      </div>
+      <div class="info-card">
+        <div class="eyebrow">Contacto</div>
+        <p><a id="info-wa-link" href="#" target="_blank" rel="noopener noreferrer">Escríbenos por WhatsApp ↗</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-menu" class="tab-panel tab-root featured" data-tab="menu" hidden>
     <div class="wrap">
       <div class="eyebrow">Carta · actualizada en tiempo real</div>
       <h2>Nuestro menú</h2>
@@ -74,7 +130,7 @@
     </div>
   </section>
 
-  <section id="tab-reservar" class="tab-panel reserve" hidden>
+  <section id="tab-reservar" class="tab-panel tab-root reserve" data-tab="reservar" hidden>
     <div class="wrap">
       <div class="eyebrow">Reservas</div>
       <h2>Resérvanos tu mesa</h2>

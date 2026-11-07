@@ -89,10 +89,43 @@ async function renderMenu() {
   const { data, error } = await api("public/menu");
   if (error || !Array.isArray(data) || !data.length) {
     grid.innerHTML = '<p class="menu-empty">Estamos actualizando el menú. Vuelve pronto.</p>';
+    renderHomeFeatured();
     return;
   }
   menuData = data;
   renderMenuGrid();
+  renderHomeFeatured();
+}
+
+// ---------- Platillos destacados (portada) ----------
+// Toma los primeros platillos disponibles del menú real como "destacados".
+function renderHomeFeatured() {
+  const el = $("#home-featured-grid");
+  if (!el) return;
+  if (!menuData.length) {
+    el.innerHTML = '<p class="menu-empty">Estamos actualizando el menú. Vuelve pronto.</p>';
+    return;
+  }
+  const picks = menuData.slice(0, 4);
+  el.innerHTML = picks.map((it) => `
+    <div class="home-featured-card">
+      <button class="menu-card-view" type="button" data-view="${it.id}">
+        <div class="menu-card-img">${dishImage(it, "menu-card")}</div>
+        <div class="menu-card-body">
+          <span class="name">${esc(it.name)}</span>
+          <span class="price">${money(it.price)}</span>
+        </div>
+      </button>
+    </div>`).join("");
+}
+
+// ---------- Horario / ubicación / contacto (portada) ----------
+function renderHomeInfo() {
+  const cityEl = document.querySelector("[data-city]");
+  if (cityEl && typeof CITY !== "undefined") cityEl.textContent = CITY;
+  const waInfo = $("#info-wa-link");
+  const business = typeof BUSINESS !== "undefined" ? BUSINESS : "";
+  if (waInfo) waInfo.href = waLink(`Hola, quiero más información sobre ${business}.`);
 }
 
 function renderMenuGrid() {
@@ -362,7 +395,7 @@ function setupReservationForm() {
 
 function switchTab(tab) {
   document.querySelectorAll(".nav-tab").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === tab)));
-  document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = p.id !== "tab-" + tab));
+  document.querySelectorAll(".tab-panel").forEach((p) => (p.hidden = p.dataset.tab !== tab));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -374,6 +407,6 @@ function setupTabs() {
 setupTabs();
 setupMenuModal();
 setupOrder();
-loadSettings();
+loadSettings().then(renderHomeInfo);
 renderMenu();
 setupReservationForm();
