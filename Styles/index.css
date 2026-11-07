@@ -34,7 +34,7 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 .btn-primary{background:var(--gold); color:#090705; font-weight:600; padding:13px 26px; border-radius:3px; text-decoration:none; border:none; cursor:pointer; font-family:var(--sans); font-size:.95rem;}
 .btn-ghost{padding:13px 22px; border:1px solid var(--gold); border-radius:3px; color:var(--gold-soft); background:rgba(180,138,63,.08); text-decoration:none; font-size:.95rem; transition:background .2s, color .2s;}
 .btn-ghost:hover{background:rgba(180,138,63,.16); color:var(--text);}
-.plate{width:100%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 35% 30%, #1a140a, #090705 72%); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; position:relative;}
+.plate{width:100%; max-width:340px; margin-left:auto; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 35% 30%, #1a140a, #090705 72%); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; position:relative;}
 .plate::before{content:""; position:absolute; inset:14%; border-radius:50%; border:1px solid var(--line);}
 .plate span{font-family:var(--serif); font-style:italic; color:var(--gold); font-size:1rem; text-align:center; max-width:60%;}
 
