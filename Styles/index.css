@@ -27,7 +27,8 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 .nav-tab[aria-pressed="true"]{color:var(--gold-soft); border-color:var(--gold);}
 .tab-root{min-height:calc(100vh - 73px);}
 
-.hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:56px; align-items:center;}
+.hero{display:flex; align-items:center;}
+.hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:56px; align-items:center; width:100%;}
 .hero h1{font-size:clamp(2.1rem,4.4vw,3.2rem); line-height:1.15; max-width:16ch;}
 .hero p{margin-top:20px; max-width:46ch; color:var(--text-muted); font-size:1.05rem;}
 .hero-actions{margin-top:30px; display:flex; gap:16px; flex-wrap:wrap;}
