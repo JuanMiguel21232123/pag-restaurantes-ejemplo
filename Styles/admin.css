@@ -78,6 +78,13 @@ input{font-family:var(--sans);}
 .settings-form input, .settings-form textarea{background:var(--bg-alt); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px; font-size:.9rem; font-family:var(--sans);}
 .settings-form textarea{resize:vertical;}
 .settings-form button{align-self:flex-start;}
+.settings-group-title{font-family:var(--serif); color:var(--gold-soft); font-style:italic; font-size:1rem; margin-top:10px; padding-top:14px; border-top:1px solid var(--line);}
+.settings-form .settings-group-title:first-child{margin-top:0; padding-top:0; border-top:none;}
+.field-hint{font-size:.82rem; color:var(--text-muted); margin-top:-10px;}
+.featured-picker-list{display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; background:var(--bg-alt); border:1px solid var(--line); border-radius:4px; padding:12px 14px;}
+.settings-form .featured-picker-item{flex-direction:row; align-items:center; gap:10px; font-size:.88rem; color:var(--text); cursor:pointer;}
+.featured-picker-item input{accent-color:var(--gold); cursor:pointer; flex:none;}
+.featured-picker-item em{color:var(--text-muted); font-style:italic; font-size:.82rem;}
 .msg.ok{color:var(--gold-soft);}
 
 @media (max-width:760px){

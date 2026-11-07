@@ -1,6 +1,7 @@
 // Panel admin: login por sesión (cookie firmada), gestión de menú, secciones y reservas.
 let menuItems = [];
 let categoryItems = [];
+let siteSettings = {};
 
 async function checkSession() {
   const { data } = await api("session");
@@ -11,9 +12,10 @@ function showPanel(name) {
   $("#login-view").hidden = true;
   $("#panel-view").hidden = false;
   $("#admin-name").textContent = name;
-  loadCategories().then(loadMenu);
+  const menuReady = loadCategories().then(loadMenu);
+  const settingsReady = loadSettingsForm();
+  Promise.all([menuReady, settingsReady]).then(renderFeaturedPicker);
   loadReservations();
-  loadSettingsForm();
   loadOrders();
   loadManualSales();
   loadExpenses();
@@ -136,6 +138,7 @@ async function loadMenu() {
   const { data } = await api("admin/menu");
   menuItems = data || [];
   renderMenuTable();
+  renderFeaturedPicker();
 }
 
 function renderMenuTable() {
@@ -338,19 +341,46 @@ $("#reservations-table").addEventListener("click", async (e) => {
 // ---------- Configuración general ----------
 async function loadSettingsForm() {
   const { data } = await api("public/settings");
+  siteSettings = data || {};
   if (!data) return;
   const form = $("#settings-form");
   if (data.hero_title) form.hero_title.value = data.hero_title;
   if (data.hero_text) form.hero_text.value = data.hero_text;
   if (data.whatsapp) form.whatsapp.value = data.whatsapp;
+  if (data.about_text) form.about_text.value = data.about_text;
+  if (data.hours_text) form.hours_text.value = data.hours_text;
+  if (data.address) form.address.value = data.address;
+}
+
+// ---------- Platillos destacados (selector en Configuración) ----------
+function renderFeaturedPicker() {
+  const container = $("#featured-picker-list");
+  if (!container) return;
+  if (!menuItems.length) {
+    container.innerHTML = '<p class="menu-empty">Agrega platillos en la pestaña Menú para poder destacarlos aquí.</p>';
+    return;
+  }
+  let featuredIds = [];
+  try { featuredIds = JSON.parse(siteSettings.featured_dishes || "[]"); } catch (e) { featuredIds = []; }
+  const featuredSet = new Set((Array.isArray(featuredIds) ? featuredIds : []).map(String));
+  container.innerHTML = menuItems.map((it) => `
+    <label class="featured-picker-item">
+      <input type="checkbox" name="featured_dish" value="${it.id}" ${featuredSet.has(String(it.id)) ? "checked" : ""}>
+      <span>${esc(it.name)} <em>(${esc(it.category || "Sin sección")})</em></span>
+    </label>`).join("");
 }
 
 $("#settings-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const form = e.target;
   const msg = $("#settings-msg");
-  const payload = Object.fromEntries(new FormData(e.target).entries());
+  const payload = Object.fromEntries(new FormData(form).entries());
+  delete payload.featured_dish; // se maneja aparte (puede repetirse varias veces)
+  const featuredIds = Array.from(form.querySelectorAll('input[name="featured_dish"]:checked')).map((el) => el.value);
+
   const set = {};
   Object.entries(payload).forEach(([k, v]) => { if (String(v).trim()) set[k] = String(v).trim(); });
+  set.featured_dishes = JSON.stringify(featuredIds);
 
   msg.textContent = "Guardando…";
   msg.className = "msg";
@@ -360,6 +390,7 @@ $("#settings-form").addEventListener("submit", async (e) => {
     msg.className = "msg error";
     return;
   }
+  siteSettings = { ...siteSettings, ...set };
   msg.textContent = "Cambios guardados. Recarga el sitio público para verlos.";
   msg.className = "msg ok";
 });

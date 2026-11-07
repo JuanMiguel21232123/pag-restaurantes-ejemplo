@@ -46,6 +46,7 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:18p
 .about-grid{display:grid; grid-template-columns:1.3fr .7fr; gap:56px; align-items:start;}
 .about-copy h2{font-size:clamp(1.6rem,3vw,2.1rem); margin-top:4px;}
 .about-copy p{margin-top:16px; color:var(--text-muted); max-width:52ch;}
+.pre-line{white-space:pre-line;}
 .about-highlights{display:flex; flex-direction:column; gap:20px;}
 .highlight{background:var(--bg-card); border:1px solid var(--line); border-radius:6px; padding:20px 22px; display:flex; flex-direction:column; gap:4px;}
 .highlight-num{font-family:var(--serif); font-style:italic; color:var(--gold); font-size:1.8rem;}

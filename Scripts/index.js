@@ -1,6 +1,8 @@
 // Portada: menú real desde Turso + formulario de reservas + "Tu pedido" (selección de platillos por WhatsApp).
 
 let menuData = [];
+let siteSettings = {}; // configuración del panel admin (hero, textos, platillos destacados elegidos, etc.)
+let menuLoaded = false;
 let order = loadOrder(); // { "<id>": cantidad }
 let orderCustomer = loadOrderCustomer(); // { name, phone, address, payment }
 
@@ -89,24 +91,30 @@ async function renderMenu() {
   const { data, error } = await api("public/menu");
   if (error || !Array.isArray(data) || !data.length) {
     grid.innerHTML = '<p class="menu-empty">Estamos actualizando el menú. Vuelve pronto.</p>';
-    renderHomeFeatured();
-    return;
+  } else {
+    menuData = data;
+    renderMenuGrid();
   }
-  menuData = data;
-  renderMenuGrid();
+  menuLoaded = true;
   renderHomeFeatured();
 }
 
 // ---------- Platillos destacados (portada) ----------
-// Toma los primeros platillos disponibles del menú real como "destacados".
+// Usa los platillos elegidos en el panel admin > Configuración (siteSettings.featured_dishes).
+// Si todavía no se eligió ninguno, muestra los primeros disponibles del menú.
 function renderHomeFeatured() {
   const el = $("#home-featured-grid");
-  if (!el) return;
+  if (!el || !menuLoaded) return;
   if (!menuData.length) {
     el.innerHTML = '<p class="menu-empty">Estamos actualizando el menú. Vuelve pronto.</p>';
     return;
   }
-  const picks = menuData.slice(0, 4);
+  let featuredIds = [];
+  try { featuredIds = JSON.parse(siteSettings.featured_dishes || "[]"); } catch (e) { featuredIds = []; }
+  let picks = Array.isArray(featuredIds) && featuredIds.length
+    ? featuredIds.map((id) => menuData.find((x) => String(x.id) === String(id))).filter(Boolean)
+    : [];
+  if (!picks.length) picks = menuData.slice(0, 4);
   el.innerHTML = picks.map((it) => `
     <div class="home-featured-card">
       <button class="menu-card-view" type="button" data-view="${it.id}">
@@ -119,10 +127,8 @@ function renderHomeFeatured() {
     </div>`).join("");
 }
 
-// ---------- Horario / ubicación / contacto (portada) ----------
+// ---------- Contacto (portada) ----------
 function renderHomeInfo() {
-  const cityEl = document.querySelector("[data-city]");
-  if (cityEl && typeof CITY !== "undefined") cityEl.textContent = CITY;
   const waInfo = $("#info-wa-link");
   const business = typeof BUSINESS !== "undefined" ? BUSINESS : "";
   if (waInfo) waInfo.href = waLink(`Hola, quiero más información sobre ${business}.`);
@@ -407,6 +413,10 @@ function setupTabs() {
 setupTabs();
 setupMenuModal();
 setupOrder();
-loadSettings().then(renderHomeInfo);
+loadSettings().then((data) => {
+  siteSettings = data || {};
+  renderHomeInfo();
+  renderHomeFeatured();
+});
 renderMenu();
 setupReservationForm();

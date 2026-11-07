@@ -114,6 +114,7 @@
 
   <section id="tab-settings" class="tab-panel" hidden>
     <form id="settings-form" class="settings-form">
+      <h3 class="settings-group-title">Portada</h3>
       <label>Título principal (portada)
         <input type="text" name="hero_title" placeholder="Cocina de fuego lento, en el corazón del valle.">
       </label>
@@ -123,6 +124,26 @@
       <label>Número de WhatsApp (solo números, con código de país, sin + ni espacios)
         <input type="text" name="whatsapp" placeholder="573001234567" pattern="[0-9]{10,15}">
       </label>
+
+      <h3 class="settings-group-title">Sobre nosotros</h3>
+      <label>Texto de "Sobre nosotros"
+        <textarea name="about_text" rows="4" placeholder="Cuenta la historia o el estilo de tu restaurante. Deja una línea en blanco para separar párrafos."></textarea>
+      </label>
+
+      <h3 class="settings-group-title">Horario y ubicación</h3>
+      <label>Horario (como se muestra en la portada)
+        <textarea name="hours_text" rows="2" placeholder="Todos los días&#10;12:00 m – 10:00 pm"></textarea>
+      </label>
+      <label>Ubicación
+        <input type="text" name="address" placeholder="Manizales, Colombia">
+      </label>
+
+      <h3 class="settings-group-title">Platillos destacados (portada)</h3>
+      <p class="field-hint">Elige los platillos que quieres mostrar en "Platillos destacados". Si no eliges ninguno, se muestran automáticamente los primeros del menú.</p>
+      <div id="featured-picker-list" class="featured-picker-list">
+        <p class="menu-empty">Cargando platillos…</p>
+      </div>
+
       <button type="submit" class="btn-primary">Guardar cambios</button>
       <p id="settings-msg" class="msg"></p>
     </form>
